@@ -5,24 +5,16 @@ local wesnoth = wesnoth
 local assert = assert
 local ipairs = ipairs
 local string = string
-local type = type
 local table = table
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
-local translate = wesnoth.textdomain "wesnoth"
 
 wesnoth.dofile("~add-ons/Creep_War_Dev/lua/.vasya_personal_json_format.lua") -- TODO
 
 
 wesnoth.wml_actions.event {
-	id = "pickadvance_unit_placed",
-	name = "unit placed",
-	T.lua { code = "pickadvance.unit_placed()" } -- 1.13 unit placed
-	-- TODO: remove this and use "side turn end" event instead
-}
-wesnoth.wml_actions.event {
-	id = "pickadvance_side_turn",
-	name = "side turn",
-	T.lua { code = "pickadvance.side_turn()" }
+	id = "pickadvance_side_turn_end",
+	name = "side turn end",
+	T.lua { code = "pickadvance.side_turn_end()" }
 }
 wesnoth.wml_actions.set_menu_item {
 	id="pickadvance",
@@ -40,32 +32,17 @@ wesnoth.wml_actions.set_menu_item {
 }
 
 
-wesnoth.wml_actions.set_menu_item {
-	id="pickadvance_exp",
-	description="Give Experience",
-	T.command {
-		T.lua {
-			code = "pickadvance.give_experience()"
-		}
-	}
-}
-wesnoth.wml_actions.set_menu_item {
-	id="pickadvance_reload",
-	description="PA: reload",
-	T.command {
-		T.lua {
-			code = 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/persist.lua")\n'
-			.. 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/dialog.lua")\n'
-			.. 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/main.lua")\n'
-		}
-	}
-}
-function pickadvance.give_experience()
-	local x1 = wesnoth.get_variable("x1") or 0
-	local y1 = wesnoth.get_variable("y1") or 0
-	local unit = wesnoth.get_unit(x1, y1)
-	unit.experience = unit.max_experience - 1
-end
+--wesnoth.wml_actions.set_menu_item {
+--	id="pickadvance_reload",
+--	description="PA: reload",
+--	T.command {
+--		T.lua {
+--			code = 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/persist.lua")\n'
+--			.. 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/dialog.lua")\n'
+--			.. 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/main.lua")\n'
+--		}
+--	}
+--}
 
 
 local function split_comma_units(string_to_split)
@@ -78,20 +55,19 @@ local function split_comma_units(string_to_split)
 			n = n + 1
 		end
 	end
-	print_as_json("split: acceptable upgrades:", result)
+	--print_as_json("split: acceptable upgrades:", result)
 	return result
 end
 
-
 function pickadvance.advance_array(unit_type)
-	print_as_json("__cfg.advances_to", wesnoth.unit_types[unit_type].__cfg.advances_to)
+	--print_as_json("__cfg.advances_to", wesnoth.unit_types[unit_type].__cfg.advances_to)
 	return split_comma_units(wesnoth.unit_types[unit_type].__cfg.advances_to)
 end
 
 
 local function parse_advances_config_local_function(unit)
 	local unit_override = unit.variables.pickadvance_override
-	print_as_json("parsing unit override", unit_override)
+	--print_as_json("parsing unit override", unit_override)
 	if unit_override then
 		return { unit_override }
 	end
@@ -129,14 +105,16 @@ end
 local function apply_advances_config(unit, force)
 	assert(unit.side == wesnoth.current.side)
 	if force or (not unit.variables.pickadvance_handled) then
-		local local_advance_array = wesnoth.synchronize_choice(function()
+		local user_advances = wesnoth.synchronize_choice(function()
 			local parsed = parse_advances_config_local_function(unit)
 			return { value = table.concat(parsed, ",") }
 		end).value
-		local_advance_array = split_comma_units(local_advance_array)
-		unit.advances_to = local_advance_array
+		assert(string.find(wesnoth.unit_types[unit.type].__cfg.advances_to or "", user_advances),
+			"Chosen advancement not found for unit type. Please report if you see this.")
+		user_advances = split_comma_units(user_advances)
+		unit.advances_to = user_advances
 		unit.variables.pickadvance_handled = true
-		print_as_json("advances for", unit.type, "x", unit.x, "y", unit.y, "advance_array", unit.advances_to, local_advance_array)
+		--print_as_json("advances for", unit.type, "x", unit.x, "y", unit.y, "advance_array", unit.advances_to, user_advances)
 	end
 end
 
@@ -149,24 +127,10 @@ function pickadvance_advancement_menu_available(unit)
 end
 
 
-function pickadvance.unit_placed()
-	local x1 = wesnoth.get_variable("x1") or 0
-	local y1 = wesnoth.get_variable("y1") or 0
-	local unit = wesnoth.get_unit(x1, y1)
-	if unit.side == wesnoth.current.side then
-		apply_advances_config(unit)
-	else
-		local side_queue = unit_queue[unit.side]
-		side_queue[#side_queue + 1] = unit
+function pickadvance.side_turn_end()
+	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
+		apply_advances_config(unit, false)
 	end
-end
-
-
-function pickadvance.side_turn()
-	for _, unit in ipairs(unit_queue[wesnoth.current.side]) do
-		apply_advances_config(unit)
-	end
-	unit_queue[wesnoth.current.side] = {}
 end
 
 
@@ -176,7 +140,7 @@ function pickadvance.pick_advance()
 	local unit = wesnoth.get_unit(x1, y1)
 	wesnoth.synchronize_choice(function()
 		local dialog_result = pickadvance.show_dialog_unsynchronized(unit)
-		print_as_json("chosen advances for unit", unit.x, unit.y, "is", dialog_result)
+		--print_as_json("chosen advances for unit", unit.x, unit.y, "is", dialog_result)
 		if dialog_result.is_ok then
 			save_user_preferences(unit, dialog_result)
 		end
