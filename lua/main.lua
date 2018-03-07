@@ -142,8 +142,7 @@ end
 
 
 function pickadvance_advancement_menu_available(unit)
-	return unit
-		and unit.x == wesnoth.get_variable("x1")
+	return unit.x == wesnoth.get_variable("x1")
 		and unit.y == wesnoth.get_variable("y1")
 		and unit.side == wesnoth.current.side
 		and #pickadvance.advance_array(unit.type) > 1
