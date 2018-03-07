@@ -1,7 +1,7 @@
 -- << pick_advance_persist
 
-pa_vasya = {}
-local pa_vasya = pa_vasya
+pickadvance = {}
+local pickadvance = pickadvance
 local wesnoth = wesnoth
 local string = string
 
@@ -9,7 +9,7 @@ local scenario = string.gsub(wesnoth.game_config.mp_settings.mp_scenario, "[^a-z
 
 local function get_global(var_name)
 	wesnoth.wml_actions.get_global_variable {
-		namespace = "pa_vasya",
+		namespace = "pickadvance",
 		from_global = var_name,
 		to_local = var_name,
 		side = "global",
@@ -17,12 +17,12 @@ local function get_global(var_name)
 	return wesnoth.get_variable(var_name)
 end
 
-function pa_vasya.get_map_override(unit_clean_type)
-	return get_global("pa_vasya_override_" .. scenario .. unit_clean_type)
+function pickadvance.get_map_override(unit_clean_type)
+	return get_global("pickadvance_override_" .. scenario .. unit_clean_type)
 end
 
-function pa_vasya.get_global_override(unit_clean_type)
-	return get_global("pa_vasya_override_" .. unit_clean_type)
+function pickadvance.get_global_override(unit_clean_type)
+	return get_global("pickadvance_override_" .. unit_clean_type)
 end
 
 

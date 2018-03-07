@@ -1,6 +1,6 @@
 -- << pickadv_dialog
 
-local pa_vasya = pa_vasya
+local pickadvance = pickadvance
 local wesnoth = wesnoth
 local assert = assert
 local ipairs = ipairs
@@ -9,10 +9,10 @@ local type = type
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 local translate = wesnoth.textdomain "wesnoth"
 
-function pa_vasya.show_dialog_unsynchronized(unit)
+function pickadvance.show_dialog_unsynchronized(unit)
 	local spacer = "\n"
 	local label = "Pick advancement for " .. wesnoth.unit_types[unit.type].name
-	local unit_type_options = pa_vasya.advance_array(unit.type)
+	local unit_type_options = pickadvance.advance_array(unit.type)
 	print_as_json("advances for", unit.type, unit_type_options)
 	local options = {}
 	for _, ut in ipairs(unit_type_options) do
