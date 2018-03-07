@@ -8,7 +8,7 @@ local string = string
 local table = table
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 
-wesnoth.dofile("~add-ons/Creep_War_Dev/lua/.vasya_personal_json_format.lua") -- TODO
+--wesnoth.dofile("~add-ons/Creep_War_Dev/lua/.vasya_personal_json_format.lua") -- TODO
 
 
 wesnoth.wml_actions.event {
@@ -30,19 +30,6 @@ wesnoth.wml_actions.set_menu_item {
 		}
 	}
 }
-
-
---wesnoth.wml_actions.set_menu_item {
---	id="pickadvance_reload",
---	description="PA: reload",
---	T.command {
---		T.lua {
---			code = 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/persist.lua")\n'
---			.. 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/dialog.lua")\n'
---			.. 'wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/main.lua")\n'
---		}
---	}
---}
 
 
 local function split_comma_units(string_to_split)
@@ -78,16 +65,6 @@ local function parse_advances_config_local_function(unit)
 	if game_override then
 		return split_comma_units(game_override)
 	end
-
-	--local map_override = pickadvance.get_map_override(clean_type)
-	--if map_override then
-	--	return split_comma_units(map_override)
-	--end
-
-	--local global_override = pickadvance.get_global_override(clean_type)
-	--if global_override then
-	--	return split_comma_units(global_override)
-	--end
 
 	return pickadvance.advance_array(unit.type)
 end
