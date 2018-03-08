@@ -103,7 +103,9 @@ local function apply_advances_config(unit, force)
 		user_advances = split_comma_units(user_advances)
 		unit.advances_to = user_advances
 		unit.variables.pickadvance_handled = true
-		print_as_json("applied advance for", unit.type, "x", unit.x, "y", unit.y, "advance_array", unit.advances_to, user_advances)
+		print_as_json("applied advance for",
+			unit.type, "x", unit.x, "y", unit.y,
+			"advance_array", unit.advances_to, user_advances)
 	end
 end
 

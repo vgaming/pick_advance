@@ -42,6 +42,11 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 
 	local listbox = T.listbox { id = "the_list", list_definition, has_minimum = true }
 
+	local reset_button = T.button {
+		return_value = -2,
+		label = "\n" .. translate("Reset") .. "/" .. translate("Help") .. "\n"
+	}
+
 	local dialog = {
 		T.tooltip { id = "tooltip_large" },
 		T.helptip { id = "tooltip_large" },
@@ -53,14 +58,14 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 			T.row { T.column { horizontal_grow = true, T.button { return_value = 2, label = "\nSave for unit\n" } } },
 			T.row { T.column { horizontal_grow = true, T.button { return_value = 1, label = "\nSave for game\n" } } },
 			T.row { T.column { horizontal_grow = true, T.button { return_value = -1, label = "\nSave for map (default)\n" } } },
-			T.row { T.column { horizontal_grow = true, T.button { return_value = -2, label = "\n" .. translate("Reset") .. "/" .. translate("Help") .. "\n" } } },
+			T.row { T.column { horizontal_grow = true, reset_button } },
 		}
 	}
 
 	local function preshow()
-		for i, unit in ipairs(options) do
-			wesnoth.set_dialog_value(spacer .. unit.name .. spacer, "the_list", i, "the_label")
-			local img = unit.__cfg.image
+		for i, advance_type in ipairs(options) do
+			wesnoth.set_dialog_value(spacer .. advance_type.name .. spacer, "the_list", i, "the_label")
+			local img = advance_type.__cfg.image
 			wesnoth.set_dialog_value(img or "misc/blank-hex.png", "the_list", i, "the_icon")
 		end
 
@@ -88,7 +93,8 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 	if not is_ok then
 		wesnoth.wml_actions.message {
 			speaker = "narrator",
-			message = "Picking advance for your unit will make the unit always advance to said type, even in multiplayer game when it's not your turn."
+			message = "Picking advance for your unit will make the unit "
+				.. "always advance to said type, even in multiplayer game when it's not your turn."
 				.. "\n\n"
 				.. "<b>Save for game</b> means saving the advance for all your new units of this type in game."
 				.. "\n\n"
