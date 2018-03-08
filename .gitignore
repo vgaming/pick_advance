@@ -1,6 +1,3 @@
-#### wesnoth files
-*.pbl
-
 #### build output
 /target/
 
