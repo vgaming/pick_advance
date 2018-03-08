@@ -96,7 +96,7 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 				.. "locally on your computer, and auto-load it for all new units "
 				.. "of same type on same map. It's safe and uses public wesnoth API "
 				.. "to do that. Does not and cannot work if you disable the add-on."
-				.. "",
+				.. "\n\n\n" .. wesnoth.get_variable("pickadvance_contacts"),
 			image = "misc/qmark.png~SCALE(200,200)"
 		}
 	end
