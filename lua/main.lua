@@ -16,6 +16,12 @@ wesnoth.wml_actions.event {
 	name = "side turn end",
 	T.lua { code = "pickadvance.side_turn_end()" }
 }
+wesnoth.wml_actions.event {
+	id = "pickadvance_recruit",
+	first_time_only = false,
+	name = "recruit",
+	T.lua { code = "pickadvance.recruit()" }
+}
 wesnoth.wml_actions.set_menu_item {
 	id="pickadvance",
 	description="Pick Advancement",
@@ -109,6 +115,14 @@ function pickadvance.side_turn_end()
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
 		apply_advances_config(unit, false)
 	end
+end
+
+
+function pickadvance.recruit()
+	local x1 = wesnoth.get_variable("x1")
+	local y1 = wesnoth.get_variable("y1")
+	local unit = wesnoth.get_unit(x1, y1)
+	apply_advances_config(unit, false)
 end
 
 
