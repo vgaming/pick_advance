@@ -1,6 +1,5 @@
-<<
 In multi-player game, you can get unexpected unit advance if it happens on enemy turn.
-With this add-on, you can set it beforehand, so you'll always get the advance you wanted.
+With this add-on, you can set it beforehand.
 
 This mod allows you specify advancement for:
 * one exact unit
@@ -9,5 +8,3 @@ This mod allows you specify advancement for:
 
 Note: the add-on overrides advancement choices to the ones available for the unit type.
 It may be thus conflicting with other add-ons if they add additional advancement choices to units, but not to unit types.
-
->>
