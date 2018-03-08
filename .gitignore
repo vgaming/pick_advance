@@ -3,3 +3,6 @@
 
 #### build output
 /target/
+
+#### pass
+/.build/.passphrase

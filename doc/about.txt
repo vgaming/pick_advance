@@ -1,14 +1,10 @@
 <<
-Set unit advances before they happen.
-
-In multi-player game, this may be your only option to pick a specific advance.
-In single-player game, this may help you automate advances (see below).
+In multi-player game, you can get unexpected unit advance if it happens on enemy turn.
+With this add-on, you can set it beforehand, so you'll always get the advance you wanted.
 
 This mod allows you specify advancement for:
 * one exact unit
-* all new units of same type in this game
-* TODO: all new units of same type on this map (scenario)
-* TODO: all new units of same type, globally for your wesnoth client (it is safe, works only while the mod is enabled)
+* all new units of same type in this game (for your side)
 
 Note: the add-on resets advancement choices to the ones available for the unit type.
 It may be thus conflicting with other add-ons if they add additional advancement choices to units, but not to unit types.
