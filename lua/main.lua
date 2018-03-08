@@ -60,27 +60,34 @@ end
 
 local function parse_advances_config_local_function(unit)
 	local unit_override = unit.variables.pickadvance_override
-	--print_as_json("parsing unit override", unit_override)
 	if unit_override then
-		return { unit_override }
+		return unit_override
 	end
 
 	local clean_type = string.gsub(unit.type, "[^a-zA-Z_]", "")
 
-	local game_override = wesnoth.get_variable("pickadvance_override_" .. clean_type)
-	if game_override then
-		return split_comma_units(game_override)
+	local game_override = wesnoth.get_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type)
+	if game_override and game_override ~= "" then
+		return game_override
 	end
 
-	return pickadvance.advance_array(unit.type)
+	local global_map_override = pickadvance.get_map_override(clean_type)
+	if global_map_override and global_map_override ~= "" then
+		return global_map_override
+	end
+
+	return table.concat(pickadvance.advance_array(unit.type), ",")
 end
 
 
 local function save_user_preferences(unit, dialog_result)
 	unit.variables.pickadvance_override = dialog_result.type
+	local clean_type = string.gsub(unit.type, "[^a-zA-Z0-9_]*", "")
 	if dialog_result.game_scope then
-		local clean_type = string.gsub(unit.type, "[^a-zA-Z0-9_]*", "")
-		wesnoth.set_variable("pickadvance_override_" .. clean_type, dialog_result.type)
+		wesnoth.set_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type, dialog_result.type)
+	end
+	if dialog_result.map_scope then
+		pickadvance.set_map_override(clean_type, dialog_result.type)
 	end
 end
 
@@ -89,8 +96,7 @@ local function apply_advances_config(unit, force)
 	assert(unit.side == wesnoth.current.side)
 	if force or (not unit.variables.pickadvance_handled) then
 		local user_advances = wesnoth.synchronize_choice(function()
-			local parsed = parse_advances_config_local_function(unit)
-			return { value = table.concat(parsed, ",") }
+			return { value = parse_advances_config_local_function(unit) }
 		end).value
 		assert(string.find(table.concat(pickadvance.advance_array(unit.type), ","), user_advances),
 			"Chosen advancement not found for unit type. Please report if you see this.")
@@ -131,11 +137,10 @@ function pickadvance.pick_advance()
 	local y1 = wesnoth.get_variable("y1")
 	local unit = wesnoth.get_unit(x1, y1)
 	wesnoth.synchronize_choice(function()
-		local dialog_result = pickadvance.show_dialog_unsynchronized(unit)
+		local current_previous = parse_advances_config_local_function(unit)
+		local dialog_result = pickadvance.show_dialog_unsynchronized(unit, current_previous)
 		print_as_json("locally chosen advance for unit", unit.type, unit.x, unit.y, dialog_result)
-		if dialog_result.is_ok then
-			save_user_preferences(unit, dialog_result)
-		end
+		save_user_preferences(unit, dialog_result)
 		return {}
 	end)
 	apply_advances_config(unit, true)
