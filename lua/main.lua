@@ -24,10 +24,10 @@ wesnoth.wml_actions.event {
 }
 wesnoth.wml_actions.set_menu_item {
 	id="pickadvance",
-	description="Pick Advancement",
+	description="Pick Advance",
 	T.show_if {
 		T.have_unit {
-			lua_function = "pickadvance_advancement_menu_available"
+			lua_function = "pickadvance_menu_available"
 		}
 	},
 	T.command {
@@ -110,7 +110,7 @@ local function apply_advances_config(unit, force)
 end
 
 
-function pickadvance_advancement_menu_available(unit)
+function pickadvance_menu_available(unit)
 	return unit.x == wesnoth.get_variable("x1")
 		and unit.y == wesnoth.get_variable("y1")
 		and unit.side == wesnoth.current.side
