@@ -96,12 +96,11 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 			message = "Picking advance for your unit will make the unit "
 				.. "always advance to said type, even in multiplayer game when it's not your turn."
 				.. "\n\n"
-				.. "<b>Save for game</b> means saving the advance for all your new units of this type in game."
+				.. "<b>Save for game</b> applies to all new units of same type in game."
 				.. "\n\n"
-				.. "<b>Save for map</b> means to store your advance preferences "
-				.. "locally on your computer, and auto-load it for all new units "
-				.. "of same type on same map. It's safe and uses public wesnoth API "
-				.. "to do that. Does not and cannot work if you disable the add-on."
+				.. "<b>Save for map</b> applies to all new units of same type in all future games on a map."
+				.. "It stores your choice locally on the computer using wesnoth API. "
+				.. "It's safe and doesn't/cannot work if you disable the add-on."
 				.. "\n\n\n" .. wesnoth.get_variable("pickadvance_contacts"),
 			image = "misc/qmark.png~SCALE(200,200)"
 		}
