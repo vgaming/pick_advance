@@ -16,7 +16,6 @@ local function get_global(var_name)
 		from_global = var_name,
 		to_local = "pickadvance_local",
 		side = "global",
-		immediate = true,
 	}
 	return wesnoth.get_variable("pickadvance_local")
 end
