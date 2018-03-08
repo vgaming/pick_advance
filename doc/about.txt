@@ -5,6 +5,3 @@ This mod allows you specify advancement for:
 * one exact unit
 * all new units of same type in game
 * all new units of same type in future games on a map. It stores your choice locally on the computer using wesnoth API. It's safe and doesn't/cannot work if you disable the add-on.
-
-Note: the add-on overrides advancement choices to the ones available for the unit type.
-It may be thus conflicting with other add-ons if they add additional advancement choices to units, but not to unit types.
