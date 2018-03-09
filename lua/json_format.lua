@@ -1,6 +1,6 @@
 -- << vasya_personal_json_format
 
--- wesnoth.dofile("~add-ons/pick_advance_by_vasya/lua/json_format.lua")
+-- wesnoth.dofile("~add-ons/pick_advance/lua/json_format.lua")
 
 local next = next
 local print = print
