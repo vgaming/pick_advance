@@ -1,5 +1,5 @@
 #### build output
-/target/
+target/
 
 #### pass
 /.build/.passphrase
