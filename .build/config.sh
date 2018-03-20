@@ -1,3 +1,5 @@
+not_pushed_ignore=true
+
 icon() {
 	hex="misc/blank-hex.png"
 	question="misc/qmark.png~SCALE(36,36)"
