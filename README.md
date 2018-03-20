@@ -1,5 +1,5 @@
 Wesnoth add-on "Pick Unit Advance"
 
-[Add-on description](./data/doc/about.txt)
+[Add-on description](./pick_advance/doc/about.txt)
 
 License: GPLv2+
