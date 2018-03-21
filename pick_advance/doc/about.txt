@@ -1,4 +1,4 @@
-In multi-player game, you do not control unit advancements if they happen on enemy turn.
+In multiplayer game, you do not control unit advances if they happen on enemy turn.
 With this add-on, you can set them beforehand for:
 
 * one exact unit

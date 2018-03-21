@@ -93,14 +93,13 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 	if not is_ok then
 		wesnoth.wml_actions.message {
 			speaker = "narrator",
-			message = "Picking advance for your unit will make the unit "
+			message = "Picking advance for your unit makes the unit "
 				.. "always advance to said type, even in multiplayer game when it's not your turn."
 				.. "\n\n"
 				.. "<b>Save for game</b> applies to all new units of same type in game."
 				.. "\n\n"
-				.. "<b>Save for map</b> applies to all new units of same type in all future games on a map."
-				.. "It stores your choice locally on the computer using wesnoth API. "
-				.. "It's safe and doesn't/cannot work if you disable the add-on."
+				.. "<b>Save for map</b> applies to all new units of same type in all future games on a map. "
+				.. "Works while the add-on is enabled."
 				.. "\n\n\n" .. wesnoth.get_variable("pickadvance_contacts"),
 			image = "misc/qmark.png~SCALE(200,200)"
 		}

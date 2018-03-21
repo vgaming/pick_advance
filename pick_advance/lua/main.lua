@@ -94,15 +94,20 @@ end
 
 local function apply_advances_config(unit, force)
 	assert(unit.side == wesnoth.current.side)
-	if force or (not unit.variables.pickadvance_handled) then
+	if force or unit.variables.pickadvance_type ~= unit.type then
 		local user_advances = wesnoth.synchronize_choice(function()
 			return { value = parse_advances_config_local_function(unit) }
 		end).value
-		assert(string.find(table.concat(pickadvance.advance_array(unit.type), ","), user_advances),
-			"Chosen advancement not found for unit type. Please report if you see this.")
+		do
+			local type_advances = table.concat(pickadvance.advance_array(unit.type), ",")
+			assert(string.find(type_advances, user_advances),
+				"Chosen advancement not found for unit type. Please report if you see this. "
+					.. "Type advances: " .. type_advances
+					.. ", user_advances: " .. user_advances)
+		end
 		user_advances = split_comma_units(user_advances)
 		unit.advances_to = user_advances
-		unit.variables.pickadvance_handled = true
+		unit.variables.pickadvance_type = unit.type
 		print_as_json("applied advance for",
 			unit.type, "x", unit.x, "y", unit.y,
 			"advance_array", unit.advances_to, user_advances)
