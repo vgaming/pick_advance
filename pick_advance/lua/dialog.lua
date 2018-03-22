@@ -43,8 +43,20 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 	local listbox = T.listbox { id = "the_list", list_definition, has_minimum = true }
 
 	local reset_button = T.button {
-		return_value = -2,
-		label = "\n" .. translate("Reset") .. "/" .. translate("Help") .. "\n"
+		return_value = -3,
+		label = "\n" .. translate("Reset") .. "\n"
+	}
+
+	local help_button = T.button {
+		return_value = -4,
+		label = "\n" .. translate("Help") .. "\n"
+	}
+
+	local reset_help_buttons = T.grid {
+		T.row {
+			T.column { horizontal_grow = true, reset_button },
+			T.column { horizontal_grow = true, help_button }
+		}
 	}
 
 	local dialog = {
@@ -58,7 +70,7 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 			T.row { T.column { horizontal_grow = true, T.button { return_value = 2, label = "\nSave for unit\n" } } },
 			T.row { T.column { horizontal_grow = true, T.button { return_value = 1, label = "\nSave for game\n" } } },
 			T.row { T.column { horizontal_grow = true, T.button { return_value = -1, label = "\nSave for map (default)\n" } } },
-			T.row { T.column { horizontal_grow = true, reset_button } },
+			T.row { T.column { horizontal_grow = true, reset_help_buttons } },
 		}
 	}
 
@@ -89,8 +101,11 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 	end
 
 	local dialog_exit_code = wesnoth.show_dialog(dialog, preshow, postshow)
-	local is_ok = dialog_exit_code ~= -2 and item_result >= 1
-	if not is_ok then
+	local is_help = dialog_exit_code == -4
+	local is_reset = dialog_exit_code == -3
+	local is_cancel = dialog_exit_code == -2
+	local is_ok = dialog_exit_code > -2 and item_result >= 1
+	if is_help then
 		wesnoth.wml_actions.message {
 			speaker = "narrator",
 			message = "Picking advance for your unit makes the unit "
@@ -106,10 +121,13 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 	end
 	print(string.format("Button %s pressed (%s). Item %s selected: %s",
 		dialog_exit_code, is_ok and "ok" or "not_ok", item_result, options[item_result].id))
+	local do_not_change = is_help or is_cancel
 	return {
-		type = is_ok and options[item_result].id or table.concat(unit_type_options, ","),
-		game_scope = not is_ok or dialog_exit_code == 1 or dialog_exit_code == -1,
-		map_scope = not is_ok or dialog_exit_code == -1
+		type = do_not_change and current
+			or is_reset and table.concat(unit_type_options, ",")
+			or options[item_result].id,
+		game_scope = is_reset or dialog_exit_code == 1 or dialog_exit_code == -1,
+		map_scope = is_reset or dialog_exit_code == -1
 	}
 end
 
