@@ -37,6 +37,9 @@ wesnoth.wml_actions.set_menu_item {
 	}
 }
 
+local function clean_type_func(unit_type)
+	return string.gsub(unit_type, "[^a-zA-Z0-9_]", "")
+end
 
 local function split_comma_units(string_to_split)
 	local result = {}
@@ -59,12 +62,12 @@ end
 
 
 local function parse_advances_config_local_function(unit)
-	local unit_override = unit.variables.pickadvance_override
+	local clean_type = clean_type_func(unit.type)
+
+	local unit_override = unit.variables["pickadvance_override_" .. clean_type]
 	if unit_override then
 		return unit_override
 	end
-
-	local clean_type = string.gsub(unit.type, "[^a-zA-Z_]", "")
 
 	local game_override = wesnoth.get_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type)
 	if game_override and game_override ~= "" then
@@ -81,8 +84,8 @@ end
 
 
 local function save_user_preferences(unit, dialog_result)
-	unit.variables.pickadvance_override = dialog_result.type
-	local clean_type = string.gsub(unit.type, "[^a-zA-Z0-9_]*", "")
+	local clean_type = clean_type_func(unit.type)
+	unit.variables["pickadvance_override_" .. clean_type] = dialog_result.type
 	if dialog_result.game_scope then
 		wesnoth.set_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type, dialog_result.type)
 	end
