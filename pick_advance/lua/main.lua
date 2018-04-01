@@ -111,9 +111,9 @@ local function apply_advances_config(unit, force)
 		user_advances = split_comma_units(user_advances)
 		unit.advances_to = user_advances
 		unit.variables.pickadvance_type = unit.type
-		print_as_json("applied advance for",
-			unit.type, "x", unit.x, "y", unit.y,
-			"advance_array", unit.advances_to, user_advances)
+		--print_as_json("applied advance for",
+		--	unit.type, "x", unit.x, "y", unit.y,
+		--	"advance_array", unit.advances_to, user_advances)
 	end
 end
 
@@ -127,7 +127,7 @@ end
 
 
 function pickadvance.side_turn_end()
-	print_as_json("Handling side turn end", wesnoth.current.side)
+	--print_as_json("Handling side turn end", wesnoth.current.side)
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
 		apply_advances_config(unit, false)
 	end
