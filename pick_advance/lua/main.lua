@@ -149,7 +149,7 @@ function pickadvance.pick_advance()
 	wesnoth.synchronize_choice(function()
 		local current_previous = parse_advances_config_local_function(unit)
 		local dialog_result = pickadvance.show_dialog_unsynchronized(unit, current_previous)
-		print_as_json("locally chosen advance for unit", unit.type, unit.x, unit.y, dialog_result)
+		print_as_json("locally chosen advance for unit", unit.type, unit.id, dialog_result)
 		save_user_preferences(unit, dialog_result)
 		return {}
 	end)

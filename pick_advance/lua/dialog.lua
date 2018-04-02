@@ -120,7 +120,7 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 		}
 	end
 	print(string.format("Button %s pressed (%s). Item %s selected: %s",
-		dialog_exit_code, is_ok and "ok" or "not_ok", item_result, options[item_result].id))
+		dialog_exit_code, is_ok and "ok" or "not ok", item_result, options[item_result].id))
 	local do_not_change = is_help or is_cancel
 	return {
 		type = do_not_change and current
