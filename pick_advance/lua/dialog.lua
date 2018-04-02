@@ -67,9 +67,9 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 			description_row,
 			T.row { T.column { horizontal_grow = true, listbox } },
 			--T.row { T.column { T.label { use_markup = true, label = "Save as default advance for:" } }, },
-			T.row { T.column { horizontal_grow = true, T.button { return_value = 2, label = "\nSave for unit\n" } } },
+			T.row { T.column { horizontal_grow = true, T.button { return_value = -1, label = "\nSave for unit (default)\n" } } },
 			T.row { T.column { horizontal_grow = true, T.button { return_value = 1, label = "\nSave for game\n" } } },
-			T.row { T.column { horizontal_grow = true, T.button { return_value = -1, label = "\nSave for map (default)\n" } } },
+			T.row { T.column { horizontal_grow = true, T.button { return_value = 2, label = "\nSave for map\n" } } },
 			T.row { T.column { horizontal_grow = true, reset_help_buttons } },
 		}
 	}
@@ -126,8 +126,8 @@ function pickadvance.show_dialog_unsynchronized(unit, current)
 		type = do_not_change and current
 			or is_reset and table.concat(unit_type_options, ",")
 			or options[item_result].id,
-		game_scope = is_reset or dialog_exit_code == 1 or dialog_exit_code == -1,
-		map_scope = is_reset or dialog_exit_code == -1
+		game_scope = is_reset or dialog_exit_code == 1 or dialog_exit_code == 2,
+		map_scope = is_reset or dialog_exit_code == 2
 	}
 end
 
