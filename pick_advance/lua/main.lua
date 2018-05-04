@@ -2,7 +2,6 @@
 
 local pickadvance = pickadvance
 local assert = assert
-local ipairs = ipairs
 local print_as_json = print_as_json
 local string = string
 local table = table
@@ -18,10 +17,14 @@ wesnoth.wml_actions.event {
 	T.lua { code = "pickadvance.side_turn_end()" }
 }
 wesnoth.wml_actions.event {
-	id = "pickadvance_recruit",
 	first_time_only = false,
 	name = "recruit",
-	T.lua { code = "pickadvance.recruit()" }
+	T.lua { code = "pickadvance.reconfigure_unit_x1y1()" }
+}
+wesnoth.wml_actions.event {
+	first_time_only = false,
+	name = "post advance",
+	T.lua { code = "pickadvance.reconfigure_unit_x1y1()" }
 }
 wesnoth.wml_actions.set_menu_item {
 	id="pickadvance",
@@ -86,7 +89,17 @@ local function get_advance_info(unit)
 end
 
 
-local function reconfigure_unit(unit)
+function pickadvance.menu_available(unit)
+	return unit.x == wesnoth.get_variable("x1")
+		and unit.y == wesnoth.get_variable("y1")
+		and unit.side == wesnoth.current.side
+		and #unit.advances_to > 0
+		and #wesnoth.unit_types[unit.type].advances_to > 1
+end
+
+
+function pickadvance.reconfigure_unit_x1y1()
+	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
 	assert(unit.side == wesnoth.current.side)
 	local clean_type = clean_type_func(unit.type)
 	if unit.variables.pickadvance_type ~= clean_type then
@@ -99,29 +112,6 @@ local function reconfigure_unit(unit)
 		unit.variables.pickadvance_type = clean_type
 		print_as_json("applied advance for", unit.id, unit.advances_to)
 	end
-end
-
-
-function pickadvance.menu_available(unit)
-	return unit.x == wesnoth.get_variable("x1")
-		and unit.y == wesnoth.get_variable("y1")
-		and unit.side == wesnoth.current.side
-		and #unit.advances_to > 0
-		and #wesnoth.unit_types[unit.type].advances_to > 1
-end
-
-
-function pickadvance.side_turn_end()
-	--print_as_json("Handling side turn end", wesnoth.current.side)
-	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
-		reconfigure_unit(unit)
-	end
-end
-
-
-function pickadvance.recruit()
-	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
-	reconfigure_unit(unit)
 end
 
 
