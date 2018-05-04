@@ -8,5 +8,5 @@ dialog "set" actions:
 
 recruit, post advance events:
 
-2. get from wml.variables, set, go to 4
-3. get from client, publicly set
+* get from wml.variables, set
+* get from local client, publicly set
