@@ -8,10 +8,11 @@ local table = table
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 local translate = wesnoth.textdomain "wesnoth"
 
-function pickadvance.show_dialog_unsynchronized(unit, current)
+function pickadvance.show_dialog_unsynchronized(unit)
+	local current = table.concat(unit.advances_to, ",")
 	local spacer = "\n"
 	local label = string.format("Pick advance (currently %s):", current)
-	local unit_type_options = pickadvance.advance_array(unit.type)
+	local unit_type_options = wesnoth.unit_types[unit.type].advances_to
 	--print_as_json("advances for", unit.type, unit_type_options)
 	local options = {}
 	for _, ut in ipairs(unit_type_options) do
