@@ -32,7 +32,7 @@ local function set_global(var_name, value)
 		from_local = "pickadvance_local",
 		to_global = var_name,
 		side = "global",
-		immediate=true,
+		immediate = true,
 	}
 end
 

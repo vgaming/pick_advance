@@ -114,7 +114,7 @@ function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 	local dialog_exit_code = wesnoth.show_dialog(dialog, preshow, postshow)
 	local is_help = dialog_exit_code == -4
 	local is_reset = dialog_exit_code == -3
-	local is_cancel = dialog_exit_code == -2
+	--local is_cancel = dialog_exit_code == -2
 	local is_ok = dialog_exit_code > -2 and item_result >= 1
 	if is_help then
 		wesnoth.wml_actions.message {
@@ -140,7 +140,9 @@ function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 		is_game_override = is_reset or game_scope,
 		game_override = game_scope and options[item_result].id or nil,
 		is_map_override = is_reset or map_scope,
-		map_override = map_scope and options[item_result].id or nil,
+		--map_override = map_scope and options[item_result].id or nil,
+		map_override = map_scope and options[item_result].id
+			or table.concat(unit_type_options, ","), -- work-around for wesnoth persistence bug (already reported)
 	}
 end
 
