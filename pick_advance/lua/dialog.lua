@@ -136,7 +136,7 @@ function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 	local map_scope = dialog_exit_code == 2
 	return {
 		is_unit_override = is_reset or is_ok,
-		unit_override = is_ok and options[item_result].id or nil,
+		unit_override = is_ok and options[item_result].id or table.concat(unit_type_options, ","),
 		is_game_override = is_reset or game_scope,
 		game_override = game_scope and options[item_result].id or nil,
 		is_map_override = is_reset or map_scope,
