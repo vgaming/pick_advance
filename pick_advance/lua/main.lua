@@ -100,18 +100,13 @@ end
 
 function pickadvance.reconfigure_unit_x1y1()
 	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
-	assert(unit.side == wesnoth.current.side)
-	local clean_type = clean_type_func(unit.type)
-	if unit.variables.pickadvance_type ~= clean_type then
-		local advance_info = get_advance_info(unit)
-		local desired = advance_info.game_override
-			or advance_info.map_override
-			or unit.advances_to
-		assert_correct_override(unit, table.concat(desired, ","))
-		unit.advances_to = desired
-		unit.variables.pickadvance_type = clean_type
-		print_as_json("applied advance for", unit.id, unit.advances_to)
-	end
+	local advance_info = get_advance_info(unit)
+	local desired = advance_info.game_override
+		or advance_info.map_override
+		or unit.advances_to
+	assert_correct_override(unit, table.concat(desired, ","))
+	unit.advances_to = desired
+	print_as_json("reconfigured", unit.id, unit.advances_to)
 end
 
 
@@ -138,7 +133,6 @@ function pickadvance.pick_advance()
 		wesnoth.set_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type,
 			dialog_result.game_override)
 	end
-	unit.variables.pickadvance_type = clean_type
 end
 
 
