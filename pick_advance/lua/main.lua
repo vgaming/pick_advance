@@ -9,13 +9,6 @@ local wesnoth = wesnoth
 local wml = wml
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 
-
-wesnoth.wml_actions.event {
-	id = "pickadvance_side_turn_end",
-	first_time_only = false,
-	name = "side turn end",
-	T.lua { code = "pickadvance.side_turn_end()" }
-}
 wesnoth.wml_actions.event {
 	first_time_only = false,
 	name = "recruit",
