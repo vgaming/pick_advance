@@ -66,19 +66,23 @@ local function assert_correct_override(unit, override)
 end
 
 
-local function calculate_desired_unit_advances(unit)
+local function get_advance_info(unit)
 	local clean_type = clean_type_func(unit.type)
-	local game_override = wesnoth.get_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type)
-	if game_override and game_override ~= "" then
-		return split_comma_units(game_override)
-	end
+	local type_advances = wesnoth.unit_types[unit.type].advances_to
+	local game_override_key = "pickadvance_override_side" .. unit.side .. "_" .. clean_type
+	local game_override = wesnoth.get_variable(game_override_key)
 	local map_override = wesnoth.synchronize_choice(function()
 		return { value = pickadvance.get_map_override(clean_type) }
 	end).value
-	if map_override and map_override ~= "" then
-		return split_comma_units(map_override)
+	local function correct(override)
+		return override and #override > 0 and #override < #type_advances and override or nil
 	end
-	return unit.advances_to
+	return {
+		type_advances = type_advances,
+		unit_override = correct(unit.advances_to),
+		game_override = correct(split_comma_units(game_override)),
+		map_override = correct(split_comma_units(map_override)),
+	}
 end
 
 
@@ -86,7 +90,10 @@ local function reconfigure_unit(unit)
 	assert(unit.side == wesnoth.current.side)
 	local clean_type = clean_type_func(unit.type)
 	if unit.variables.pickadvance_type ~= clean_type then
-		local desired = calculate_desired_unit_advances(unit)
+		local advance_info = get_advance_info(unit)
+		local desired = advance_info.game_override
+			or advance_info.map_override
+			or unit.advances_to
 		assert_correct_override(unit, table.concat(desired, ","))
 		unit.advances_to = desired
 		unit.variables.pickadvance_type = clean_type
@@ -124,17 +131,22 @@ function pickadvance.pick_advance()
 	local unit = wesnoth.get_unit(x1, y1)
 	local clean_type = clean_type_func(unit.type)
 	local dialog_result = wesnoth.synchronize_choice(function()
-		local dialog_result = pickadvance.show_dialog_unsynchronized(unit)
+		local dialog_result = pickadvance.show_dialog_unsynchronized(unit, get_advance_info(unit) )
 		print_as_json("locally chosen advance for unit", unit.type, unit.id, dialog_result)
-		if dialog_result.map_scope then
-			pickadvance.set_map_override(clean_type, dialog_result.type)
+		if dialog_result.is_map_override then
+			pickadvance.set_map_override(clean_type, dialog_result.map_override)
 		end
 		return dialog_result
 	end)
-	assert_correct_override(unit, dialog_result.type)
-	unit.advances_to = split_comma_units(dialog_result.type)
-	if dialog_result.game_scope then
-		wesnoth.set_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type, dialog_result.type)
+	assert_correct_override(unit, dialog_result.unit_override or "")
+	assert_correct_override(unit, dialog_result.game_override or "")
+	assert_correct_override(unit, dialog_result.map_override or "")
+	if dialog_result.is_unit_override then
+		unit.advances_to = split_comma_units(dialog_result.unit_override)
+	end
+	if dialog_result.is_game_override then
+		wesnoth.set_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type,
+			dialog_result.game_override)
 	end
 	unit.variables.pickadvance_type = clean_type
 end

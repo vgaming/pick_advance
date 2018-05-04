@@ -1,4 +1,4 @@
--- << pickadv_dialog
+-- << dialog(pa)
 
 local pickadvance = pickadvance
 local wesnoth = wesnoth
@@ -8,10 +8,20 @@ local table = table
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 local translate = wesnoth.textdomain "wesnoth"
 
-function pickadvance.show_dialog_unsynchronized(unit)
+function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 	local current = table.concat(unit.advances_to, ",")
 	local spacer = "\n"
-	local label = string.format("Pick advance (currently %s):", current)
+	local label = "Pick advance. Current overrides: \n"
+	if advance_info.unit_override then
+		label = label .. table.concat(advance_info.unit_override, ",") .. " (unit), \n"
+	end
+	if advance_info.game_override then
+		label = label .. table.concat(advance_info.game_override, ",") .. " (game), \n"
+	end
+	if advance_info.map_override then
+		label = label .. table.concat(advance_info.map_override, ",") .. " (map), \n"
+	end
+
 	local unit_type_options = wesnoth.unit_types[unit.type].advances_to
 	--print_as_json("advances for", unit.type, unit_type_options)
 	local options = {}
@@ -122,13 +132,15 @@ function pickadvance.show_dialog_unsynchronized(unit)
 	end
 	print(string.format("Button %s pressed (%s). Item %s selected: %s",
 		dialog_exit_code, is_ok and "ok" or "not ok", item_result, options[item_result].id))
-	local do_not_change = is_help or is_cancel
+	local game_scope = dialog_exit_code == 1 or dialog_exit_code == 2
+	local map_scope = dialog_exit_code == 2
 	return {
-		type = do_not_change and current
-			or is_reset and table.concat(unit_type_options, ",")
-			or options[item_result].id,
-		game_scope = is_reset or dialog_exit_code == 1 or dialog_exit_code == 2,
-		map_scope = is_reset or dialog_exit_code == 2
+		is_unit_override = is_reset or is_ok,
+		unit_override = is_ok and options[item_result].id or nil,
+		is_game_override = is_reset or game_scope,
+		game_override = game_scope and options[item_result].id or nil,
+		is_map_override = is_reset or map_scope,
+		map_override = map_scope and options[item_result].id or nil,
 	}
 end
 
