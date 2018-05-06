@@ -110,7 +110,7 @@ function pickadvance.pick_advance()
 	local clean_type = clean_type_func(unit.type)
 	local dialog_result = wesnoth.synchronize_choice(function()
 		local dialog_result = pickadvance.show_dialog_unsynchronized(unit, get_advance_info(unit) )
-		print_as_json("locally chosen advance for unit", unit.type, unit.id, dialog_result)
+		print_as_json("locally chosen advance for unit", unit.id, dialog_result)
 		if dialog_result.is_map_override then
 			pickadvance.set_map_override(clean_type, dialog_result.map_override)
 		end

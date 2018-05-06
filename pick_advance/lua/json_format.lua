@@ -1,4 +1,4 @@
--- << vasya_personal_json_format
+-- << json_format
 
 -- wesnoth.dofile("~add-ons/pick_advance/lua/json_format.lua")
 
