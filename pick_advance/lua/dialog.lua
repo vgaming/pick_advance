@@ -91,9 +91,7 @@ function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 			wesnoth.set_dialog_value(img or "misc/blank-hex.png", "the_list", i, "the_icon")
 		end
 
-		if wesnoth.compare_versions(wesnoth.game_config.version, ">=", "1.13.10") then
-			wesnoth.set_dialog_focus("the_list")
-		end
+		wesnoth.set_dialog_focus("the_list")
 
 		local function select()
 			local i = wesnoth.get_dialog_value "the_list"
