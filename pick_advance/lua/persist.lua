@@ -20,8 +20,8 @@ local function get_global(var_name)
 	return wesnoth.get_variable("pickadvance_local")
 end
 
-function pickadvance.get_map_override(unit_clean_type)
-	return get_global("pickadvance_override_" .. scenario .. unit_clean_type)
+function pickadvance.get_map_override(from)
+	return get_global("pickadvance_scenario_" .. scenario .. "_from_" .. from)
 end
 
 
@@ -36,9 +36,9 @@ local function set_global(var_name, value)
 	}
 end
 
-function pickadvance.set_map_override(unit_clean_type, string_override)
-	print_as_json("setting map override with", "pickadvance_override_" .. scenario .. unit_clean_type, string_override)
-	return set_global("pickadvance_override_" .. scenario .. unit_clean_type, string_override)
+function pickadvance.set_map_override(from, string_override)
+	print_as_json("setting local map override with", scenario, from, string_override)
+	return set_global("pickadvance_scenario_" .. scenario .. "_from_" .. from, string_override)
 end
 
 

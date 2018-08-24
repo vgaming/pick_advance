@@ -3,6 +3,7 @@
 local pickadvance = pickadvance
 local assert = assert
 local print_as_json = print_as_json
+local ipairs = ipairs
 local string = string
 local table = table
 local wesnoth = wesnoth
@@ -10,14 +11,9 @@ local wml = wml
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 
 wesnoth.wml_actions.event {
-	first_time_only = false,
-	name = "recruit",
-	T.lua { code = "pickadvance.reconfigure_unit_x1y1()" }
-}
-wesnoth.wml_actions.event {
-	first_time_only = false,
-	name = "post advance",
-	T.lua { code = "pickadvance.reconfigure_unit_x1y1()" }
+	first_time_only = true,
+	name = "start",
+	T.lua { code = "pickadvance.start_event()" }
 }
 wesnoth.wml_actions.set_menu_item {
 	id="pickadvance",
@@ -53,22 +49,57 @@ local function split_comma_units(string_to_split)
 end
 
 
-local function assert_correct_override(unit, override)
-	local type_advances = table.concat(wesnoth.unit_types[unit.type].advances_to, ",")
-	assert(string.find(type_advances, override),
-		"Chosen advancement not found for unit type. Please report if you see this. "
-			.. "Type advances: " .. type_advances
-			.. ", user override: " .. override)
+local function original_advances(unit)
+	local clean_type = clean_type_func(unit.type)
+	local variable = unit.variables["pickadvance_orig_" .. clean_type]
+	return split_comma_units(variable), clean_type_func(variable)
+end
+
+
+local function array_to_set(arr)
+	local result = {}
+	for _, v in ipairs(arr) do
+		result[v] = true
+	end
+	return result
+end
+
+local function array_filter_inplace(arr, func)
+	local filt_index = 1
+	for ahead_index, value in ipairs(arr) do
+		arr[ahead_index] = nil
+		if func(value) then
+			arr[filt_index] = value
+			filt_index = filt_index + 1
+		end
+	end
+end
+
+local function array_filter(arr, func)
+	local result = {}
+	for _, v in ipairs(arr) do
+		if func(v) then
+			result[#result + 1] = v
+		end
+	end
+	return result
+end
+
+--- works as anti-cheat and fixes tricky bugs in [male]/[female]/undead variation overrides
+local function filter_overrides(unit, overrides)
+	local possible_advances_array = original_advances(unit)
+	local possible_advances = array_to_set(possible_advances_array)
+	local filtered = array_filter(overrides, function(e) return possible_advances[e] end)
+	return #filtered > 0 and filtered or possible_advances_array
 end
 
 
 local function get_advance_info(unit)
-	local clean_type = clean_type_func(unit.type)
-	local type_advances = wesnoth.unit_types[unit.type].advances_to
-	local game_override_key = "pickadvance_override_side" .. unit.side .. "_" .. clean_type
+	local type_advances, orig_options_sanitized = original_advances(unit)
+	local game_override_key = "pickadvance_side" .. unit.side .. "_" .. orig_options_sanitized
 	local game_override = wesnoth.get_variable(game_override_key)
 	local map_override = wesnoth.synchronize_choice(function()
-		return { value = pickadvance.get_map_override(clean_type) }
+		return { value = pickadvance.get_map_override(orig_options_sanitized) }
 	end).value
 	local function correct(override)
 		return override and #override > 0 and #override < #type_advances and override or nil
@@ -87,19 +118,56 @@ function pickadvance.menu_available(unit)
 		and unit.y == wesnoth.get_variable("y1")
 		and unit.side == wesnoth.current.side
 		and #unit.advances_to > 0
-		and #wesnoth.unit_types[unit.type].advances_to > 1
+		and #(original_advances(unit) or unit.advances_to) > 1
 end
 
 
-function pickadvance.reconfigure_unit_x1y1()
-	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
-	local advance_info = get_advance_info(unit)
-	local desired = advance_info.game_override
-		or advance_info.map_override
-		or unit.advances_to
-	assert_correct_override(unit, table.concat(desired, ","))
-	unit.advances_to = desired
-	print_as_json("reconfigured", unit.id, unit.advances_to)
+local function initialize_unit(unit)
+	if (unit.side ~= wesnoth.current.side) then return end
+	local clean_type = clean_type_func(unit.type)
+	if unit.variables["pickadvance_orig_" .. clean_type] == nil then
+		unit.variables["pickadvance_orig_" .. clean_type] = table.concat(unit.advances_to, ",")
+		local advance_info = get_advance_info(unit)
+		local desired = advance_info.game_override
+			or advance_info.map_override
+			or unit.advances_to
+		desired = filter_overrides(unit, desired)
+		unit.advances_to = desired
+		--print_as_json("reconfigured", unit.id, unit.advances_to)
+	end
+end
+
+function pickadvance.initialize_unit_x1y1(x1, y1)
+	local unit = wesnoth.get_unit(x1 or wml.variables.x1, y1 or wml.variables.y1)
+	initialize_unit(unit)
+end
+
+
+function pickadvance.turn_refresh_event()
+	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
+		initialize_unit(unit)
+	end
+end
+
+function pickadvance.start_event()
+	wesnoth.wml_actions.event {
+		first_time_only = false,
+		name = "recruit", -- it's important for sync that player controls the unit
+		T.lua { code = "pickadvance.initialize_unit_x1y1()" }
+	}
+	wesnoth.wml_actions.event {
+		first_time_only = false,
+		name = "post advance",
+		T.lua { code = "pickadvance.initialize_unit_x1y1()" }
+	}
+	wesnoth.wml_actions.event {
+		first_time_only = false,
+		name = "turn refresh",
+		T.lua { code = "pickadvance.turn_refresh_event()" }
+	}
+	for _, unit in ipairs(wesnoth.get_units {}) do
+		initialize_unit(unit)
+	end
 end
 
 
@@ -107,24 +175,27 @@ function pickadvance.pick_advance()
 	local x1 = wesnoth.get_variable("x1")
 	local y1 = wesnoth.get_variable("y1")
 	local unit = wesnoth.get_unit(x1, y1)
+	initialize_unit(unit)
+	local _, orig_options_sanitized = original_advances(unit)
 	local clean_type = clean_type_func(unit.type)
 	local dialog_result = wesnoth.synchronize_choice(function()
 		local dialog_result = pickadvance.show_dialog_unsynchronized(unit, get_advance_info(unit) )
 		print_as_json("locally chosen advance for unit", unit.id, dialog_result)
 		if dialog_result.is_map_override then
-			pickadvance.set_map_override(clean_type, dialog_result.map_override)
+			pickadvance.set_map_override(orig_options_sanitized, dialog_result.map_override)
 		end
 		return dialog_result
 	end)
-	assert_correct_override(unit, dialog_result.unit_override or "")
-	assert_correct_override(unit, dialog_result.game_override or "")
-	assert_correct_override(unit, dialog_result.map_override or "")
+	dialog_result.unit_override = split_comma_units(dialog_result.unit_override)
+	dialog_result.game_override = split_comma_units(dialog_result.game_override)
+	dialog_result.unit_override = filter_overrides(unit, dialog_result.unit_override)
+	dialog_result.game_override = filter_overrides(unit, dialog_result.game_override)
 	if dialog_result.is_unit_override then
-		unit.advances_to = split_comma_units(dialog_result.unit_override)
+		unit.advances_to = dialog_result.unit_override
 	end
 	if dialog_result.is_game_override then
-		wesnoth.set_variable("pickadvance_override_side" .. unit.side .. "_" .. clean_type,
-			dialog_result.game_override)
+		local key = "pickadvance_side" .. unit.side .. "_" .. orig_options_sanitized
+		wesnoth.set_variable(key, table.concat(dialog_result.game_override, ","))
 	end
 end
 

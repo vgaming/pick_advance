@@ -21,7 +21,7 @@ function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 		label = label .. table.concat(advance_info.map_override, ",") .. " (map), \n"
 	end
 
-	local unit_type_options = wesnoth.unit_types[unit.type].advances_to
+	local unit_type_options = advance_info.type_advances
 	--print_as_json("advances for", unit.type, unit_type_options)
 	local options = {}
 	for _, ut in ipairs(unit_type_options) do
@@ -112,7 +112,6 @@ function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 	local is_help = dialog_exit_code == -4
 	local is_reset = dialog_exit_code == -3
 	--local is_cancel = dialog_exit_code == -2
-	local is_ok = dialog_exit_code > -2 and item_result >= 1
 	if is_help then
 		wesnoth.wml_actions.message {
 			speaker = "narrator",
@@ -127,6 +126,7 @@ function pickadvance.show_dialog_unsynchronized(unit, advance_info)
 			image = "misc/qmark.png~SCALE(200,200)"
 		}
 	end
+	local is_ok = dialog_exit_code > -2 and item_result >= 1
 	print(string.format("Button %s pressed (%s). Item %s selected: %s",
 		dialog_exit_code, is_ok and "ok" or "not ok", item_result, options[item_result].id))
 	local game_scope = dialog_exit_code == 1 or dialog_exit_code == 2
