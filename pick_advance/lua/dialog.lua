@@ -8,7 +8,7 @@ local table = table
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 local translate = wesnoth.textdomain "wesnoth"
 
-function pickadvance.show_dialog_unsynchronized(unit, advance_info)
+function pickadvance.show_dialog_unsynchronized(advance_info)
 	local spacer = "\n"
 	local label = "Pick advance. Current overrides: \n"
 	if advance_info.unit_override then

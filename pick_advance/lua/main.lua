@@ -1,7 +1,6 @@
 -- << pick_advance/main.lua
 
 local pickadvance = pickadvance
-local assert = assert
 local print_as_json = print_as_json
 local ipairs = ipairs
 local string = string
@@ -16,8 +15,8 @@ wesnoth.wml_actions.event {
 	T.lua { code = "pickadvance.start_event()" }
 }
 wesnoth.wml_actions.set_menu_item {
-	id="pickadvance",
-	description="Pick Advance",
+	id = "pickadvance",
+	description = "Pick Advance",
 	T.show_if {
 		T.have_unit {
 			lua_function = "pickadvance.menu_available"
@@ -64,17 +63,6 @@ local function array_to_set(arr)
 	return result
 end
 
-local function array_filter_inplace(arr, func)
-	local filt_index = 1
-	for ahead_index, value in ipairs(arr) do
-		arr[ahead_index] = nil
-		if func(value) then
-			arr[filt_index] = value
-			filt_index = filt_index + 1
-		end
-	end
-end
-
 local function array_filter(arr, func)
 	local result = {}
 	for _, v in ipairs(arr) do
@@ -104,6 +92,7 @@ local function get_advance_info(unit)
 	local function correct(override)
 		return override and #override > 0 and #override < #type_advances and override or nil
 	end
+
 	return {
 		type_advances = type_advances,
 		unit_override = correct(unit.advances_to),
@@ -177,9 +166,8 @@ function pickadvance.pick_advance()
 	local unit = wesnoth.get_unit(x1, y1)
 	initialize_unit(unit)
 	local _, orig_options_sanitized = original_advances(unit)
-	local clean_type = clean_type_func(unit.type)
 	local dialog_result = wesnoth.synchronize_choice(function()
-		local dialog_result = pickadvance.show_dialog_unsynchronized(unit, get_advance_info(unit) )
+		local dialog_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit))
 		print_as_json("locally chosen advance for unit", unit.id, dialog_result)
 		if dialog_result.is_map_override then
 			pickadvance.set_map_override(orig_options_sanitized, dialog_result.map_override)
