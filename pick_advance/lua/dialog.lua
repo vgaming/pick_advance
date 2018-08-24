@@ -1,5 +1,6 @@
--- << dialog(pa)
+-- << pickadvance_dialog
 
+pickadvance = {}
 local pickadvance = pickadvance
 local wesnoth = wesnoth
 local ipairs = ipairs
@@ -10,16 +11,14 @@ local translate = wesnoth.textdomain "wesnoth"
 
 function pickadvance.show_dialog_unsynchronized(advance_info)
 	local spacer = "\n"
-	local label = "Pick advance. Current overrides: \n"
-	if advance_info.unit_override then
-		label = label .. table.concat(advance_info.unit_override, ",") .. " (unit), \n"
-	end
-	if advance_info.game_override then
-		label = label .. table.concat(advance_info.game_override, ",") .. " (game), \n"
-	end
-	if advance_info.map_override then
-		label = label .. table.concat(advance_info.map_override, ",") .. " (map), \n"
-	end
+	local label = "Plan advance:"
+--	local label = "Pick advance. Current overrides: \n"
+--	if advance_info.unit_override then
+--		label = label .. table.concat(advance_info.unit_override, ",") .. " (unit), \n"
+--	end
+--	if advance_info.game_override then
+--		label = label .. table.concat(advance_info.game_override, ",") .. " (game), \n"
+--	end
 
 	local unit_type_options = advance_info.type_advances
 	--print_as_json("advances for", unit.type, unit_type_options)
@@ -68,6 +67,8 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 			T.column { horizontal_grow = true, help_button }
 		}
 	}
+	local unit_button = T.button { return_value = -1, label = "\nSave for unit\n" }
+	local recruits_button = T.button { return_value = 1, label = "\nSave for unit and new recruits\n" }
 
 	local dialog = {
 		T.tooltip { id = "tooltip_large" },
@@ -77,16 +78,23 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 			description_row,
 			T.row { T.column { horizontal_grow = true, listbox } },
 			--T.row { T.column { T.label { use_markup = true, label = "Save as default advance for:" } }, },
-			T.row { T.column { horizontal_grow = true, T.button { return_value = -1, label = "\nSave for unit (default)\n" } } },
-			T.row { T.column { horizontal_grow = true, T.button { return_value = 1, label = "\nSave for game\n" } } },
-			T.row { T.column { horizontal_grow = true, T.button { return_value = 2, label = "\nSave for map\n" } } },
+			T.row { T.column { horizontal_grow = true, unit_button } },
+			T.row { T.column { horizontal_grow = true, recruits_button } },
 			T.row { T.column { horizontal_grow = true, reset_help_buttons } },
 		}
 	}
 
 	local function preshow()
 		for i, advance_type in ipairs(options) do
-			wesnoth.set_dialog_value(spacer .. advance_type.name .. spacer, "the_list", i, "the_label")
+			local text = spacer .. advance_type.name
+			if advance_type.id == (advance_info.unit_override or {})[1] and advance_info.unit_override[2] == nil then
+				text = text .. " &lt;-unit"
+			end
+			if advance_type.id == (advance_info.game_override or {})[1] and advance_info.game_override[2] == nil then
+				text = text .. " &lt;-recruits"
+			end
+			text = text .. "  " .. spacer
+			wesnoth.set_dialog_value(text, "the_list", i, "the_label")
 			local img = advance_type.__cfg.image
 			wesnoth.set_dialog_value(img or "misc/blank-hex.png", "the_list", i, "the_icon")
 		end
@@ -115,32 +123,25 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 	if is_help then
 		wesnoth.wml_actions.message {
 			speaker = "narrator",
-			message = "Picking advance for your unit makes the unit "
-				.. "always advance to said type, even in multiplayer game when it's not your turn."
+			message = "<b>Save for unit</b> will make your unit always advance to said type. "
+				.. "Even if it's leveled during enemy-s turn."
 				.. "\n\n"
-				.. "<b>Save for game</b> applies to all new units of same type in game."
+				.. "<b>Save for game</b> applies to all new recruits of same type in game."
 				.. "\n\n"
-				.. "<b>Save for map</b> applies to all new units of same type in all future games on a map. "
-				.. "Works while the add-on is enabled."
-				.. "\n\n\n" .. wesnoth.get_variable("pickadvance_contacts"),
+				.. wesnoth.get_variable("pickadvance_contacts"),
 			image = "misc/qmark.png~SCALE(200,200)"
 		}
 	end
 	local is_ok = dialog_exit_code > -2 and item_result >= 1
 	print(string.format("Button %s pressed (%s). Item %s selected: %s",
 		dialog_exit_code, is_ok and "ok" or "not ok", item_result, options[item_result].id))
-	local game_scope = dialog_exit_code == 1 or dialog_exit_code == 2
-	local map_scope = dialog_exit_code == 2
+	local game_scope = dialog_exit_code == 1
 	return {
 		is_unit_override = is_reset or is_ok,
 		unit_override = is_ok and options[item_result].id
 			or is_reset and table.concat(unit_type_options, ","),
 		is_game_override = is_reset or game_scope,
 		game_override = game_scope and options[item_result].id or nil,
-		is_map_override = is_reset or map_scope,
-		--map_override = map_scope and options[item_result].id or nil,
-		map_override = map_scope and options[item_result].id
-			or is_reset and table.concat(unit_type_options, ","), -- work-around for wesnoth persistence bug (already reported)
 	}
 end
 

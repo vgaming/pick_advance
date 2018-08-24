@@ -86,9 +86,6 @@ local function get_advance_info(unit)
 	local type_advances, orig_options_sanitized = original_advances(unit)
 	local game_override_key = "pickadvance_side" .. unit.side .. "_" .. orig_options_sanitized
 	local game_override = wesnoth.get_variable(game_override_key)
-	local map_override = wesnoth.synchronize_choice(function()
-		return { value = pickadvance.get_map_override(orig_options_sanitized) }
-	end).value
 	local function correct(override)
 		return override and #override > 0 and #override < #type_advances and override or nil
 	end
@@ -97,7 +94,6 @@ local function get_advance_info(unit)
 		type_advances = type_advances,
 		unit_override = correct(unit.advances_to),
 		game_override = correct(split_comma_units(game_override)),
-		map_override = correct(split_comma_units(map_override)),
 	}
 end
 
@@ -112,14 +108,11 @@ end
 
 
 local function initialize_unit(unit)
-	if (unit.side ~= wesnoth.current.side) then return end
 	local clean_type = clean_type_func(unit.type)
 	if unit.variables["pickadvance_orig_" .. clean_type] == nil then
 		unit.variables["pickadvance_orig_" .. clean_type] = table.concat(unit.advances_to, ",")
 		local advance_info = get_advance_info(unit)
-		local desired = advance_info.game_override
-			or advance_info.map_override
-			or unit.advances_to
+		local desired = advance_info.game_override or unit.advances_to
 		desired = filter_overrides(unit, desired)
 		unit.advances_to = desired
 		--print_as_json("reconfigured", unit.id, unit.advances_to)
@@ -154,9 +147,6 @@ function pickadvance.start_event()
 		name = "turn refresh",
 		T.lua { code = "pickadvance.turn_refresh_event()" }
 	}
-	for _, unit in ipairs(wesnoth.get_units {}) do
-		initialize_unit(unit)
-	end
 end
 
 
@@ -169,9 +159,6 @@ function pickadvance.pick_advance()
 	local dialog_result = wesnoth.synchronize_choice(function()
 		local dialog_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit))
 		print_as_json("locally chosen advance for unit", unit.id, dialog_result)
-		if dialog_result.is_map_override then
-			pickadvance.set_map_override(orig_options_sanitized, dialog_result.map_override)
-		end
 		return dialog_result
 	end)
 	dialog_result.unit_override = split_comma_units(dialog_result.unit_override)

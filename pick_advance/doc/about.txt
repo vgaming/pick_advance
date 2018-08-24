@@ -3,4 +3,3 @@ With this add-on, you can set them beforehand for:
 
 * one exact unit
 * all new recruits of same type in game
-* all new recruits of same type in future games on a map. (Works while add-on is enabled.)
