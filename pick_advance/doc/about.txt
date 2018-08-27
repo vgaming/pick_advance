@@ -2,4 +2,4 @@ In multiplayer game, you do not control unit advances if they happen on enemy tu
 With this add-on, you can set them beforehand for:
 
 * one exact unit
-* all new recruits of same type in game
+* all new recruits
