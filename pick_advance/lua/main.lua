@@ -115,7 +115,7 @@ local function initialize_unit(unit)
 		local desired = advance_info.game_override or unit.advances_to
 		desired = filter_overrides(unit, desired)
 		unit.advances_to = desired
-		--print_as_json("reconfigured", unit.id, unit.advances_to)
+		print_as_json("initialized unit", unit.id, unit.advances_to)
 	end
 end
 
