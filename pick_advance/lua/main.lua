@@ -161,6 +161,7 @@ function pickadvance.pick_advance()
 		print_as_json("locally chosen advance for unit", unit.id, dialog_result)
 		return dialog_result
 	end)
+	print_as_json("applying manual choice for", unit.id, dialog_result)
 	dialog_result.unit_override = split_comma_units(dialog_result.unit_override)
 	dialog_result.game_override = split_comma_units(dialog_result.game_override)
 	dialog_result.unit_override = filter_overrides(unit, dialog_result.unit_override)
