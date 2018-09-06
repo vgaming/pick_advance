@@ -109,7 +109,7 @@ end
 
 local function initialize_unit(unit)
 	local clean_type = clean_type_func(unit.type)
-	if unit.variables["pickadvance_orig_" .. clean_type] == nil then
+	if unit.variables["pickadvance_orig_" .. clean_type] == nil and #unit.advances_to > 1 then
 		unit.variables["pickadvance_orig_" .. clean_type] = table.concat(unit.advances_to, ",")
 		local advance_info = get_advance_info(unit)
 		local desired = advance_info.game_override or unit.advances_to
