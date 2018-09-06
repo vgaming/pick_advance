@@ -50,7 +50,7 @@ end
 
 local function original_advances(unit)
 	local clean_type = clean_type_func(unit.type)
-	local variable = unit.variables["pickadvance_orig_" .. clean_type]
+	local variable = unit.variables["pickadvance_orig_" .. clean_type] or ""
 	return split_comma_units(variable), clean_type_func(variable)
 end
 
