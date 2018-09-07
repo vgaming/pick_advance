@@ -99,8 +99,8 @@ end
 
 
 function pickadvance.menu_available(unit)
-	return unit.x == wesnoth.get_variable("x1")
-		and unit.y == wesnoth.get_variable("y1")
+	return unit.x == wml.variables.x1
+		and unit.y == wml.variables.y1
 		and unit.side == wesnoth.current.side
 		and #unit.advances_to > 0
 		and #(original_advances(unit) or unit.advances_to) > 1
@@ -128,10 +128,20 @@ end
 function pickadvance.turn_refresh_event()
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
 		initialize_unit(unit)
+		if #unit.advances_to > 1 and pickadvance.force_choice then
+			pickadvance.pick_advance(unit)
+		end
 	end
 end
 
 function pickadvance.start_event()
+	pickadvance.force_choice = true
+	for _, side in ipairs(wesnoth.sides) do
+		if #side.recruit ~= 0 and side.__cfg.allow_player then
+			pickadvance.force_choice = false
+		end
+	end
+	pickadvance.force_choice = pickadvance.force_choice or wesnoth.get_variable("pickadvance_force_choice")
 	wesnoth.wml_actions.event {
 		first_time_only = false,
 		name = "recruit", -- it's important for sync that player controls the unit
@@ -150,10 +160,8 @@ function pickadvance.start_event()
 end
 
 
-function pickadvance.pick_advance()
-	local x1 = wesnoth.get_variable("x1")
-	local y1 = wesnoth.get_variable("y1")
-	local unit = wesnoth.get_unit(x1, y1)
+function pickadvance.pick_advance(unit)
+	unit = unit or wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
 	initialize_unit(unit)
 	local _, orig_options_sanitized = original_advances(unit)
 	local dialog_result = wesnoth.synchronize_choice(function()
