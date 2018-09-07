@@ -160,13 +160,13 @@ function pickadvance.turn_refresh_event()
 end
 
 function pickadvance.start_event()
-	pickadvance.force_choice = true
+	pickadvance.no_recruit_map = true
 	for _, side in ipairs(wesnoth.sides) do
 		if #side.recruit ~= 0 and side.__cfg.allow_player then
-			pickadvance.force_choice = false
+			pickadvance.no_recruit_map = false
 		end
 	end
-	pickadvance.force_choice = pickadvance.force_choice or wesnoth.get_variable("pickadvance_force_choice")
+	pickadvance.force_choice = pickadvance.no_recruit_map or wesnoth.get_variable("pickadvance_force_choice")
 	wesnoth.wml_actions.event {
 		first_time_only = false,
 		name = "recruit", -- it's important for sync that player controls the unit

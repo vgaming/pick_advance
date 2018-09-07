@@ -9,6 +9,17 @@ local table = table
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 local translate = wesnoth.textdomain "wesnoth"
 
+local function filter_false(arr)
+	local result = {}
+	for _, v in ipairs(arr) do
+		if v ~= false then
+			result[#result + 1] = v
+		end
+	end
+	return result
+end
+
+
 function pickadvance.show_dialog_unsynchronized(advance_info)
 	local spacer = "\n"
 	local label = "Plan advance:"
@@ -67,21 +78,24 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 			T.column { horizontal_grow = true, help_button }
 		}
 	}
-	local unit_button = T.button { return_value = -1, label = "\nSave for unit\n" }
-	local recruits_button = T.button { return_value = 1, label = "\nSave for unit and new recruits\n" }
+	local unit_button_label = pickadvance.no_recruit_map and "\nSave\n" or "\nSave for unit\n"
+	local unit_button = T.button { return_value = -1, label = unit_button_label }
+	local recruits_subbutton = T.button { return_value = 1, label = "\nSave for unit and new recruits\n" }
+	local recruits_button = not pickadvance.no_recruit_map
+		and T.row { T.column { horizontal_grow = true, recruits_subbutton } }
 
 	local dialog = {
 		T.tooltip { id = "tooltip_large" },
 		T.helptip { id = "tooltip_large" },
-		T.grid {
+		T.grid(filter_false {
 			T.row { T.column { T.spacer { width = 250 } } },
 			description_row,
 			T.row { T.column { horizontal_grow = true, listbox } },
 			--T.row { T.column { T.label { use_markup = true, label = "Save as default advance for:" } }, },
 			T.row { T.column { horizontal_grow = true, unit_button } },
-			T.row { T.column { horizontal_grow = true, recruits_button } },
+			recruits_button,
 			T.row { T.column { horizontal_grow = true, reset_help_buttons } },
-		}
+		})
 	}
 
 	local function preshow()
