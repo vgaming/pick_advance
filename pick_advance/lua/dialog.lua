@@ -32,6 +32,11 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 	end
 	local show_images = true
 
+	local unit_override_one = (advance_info.unit_override or {})[2] == nil
+		and (advance_info.unit_override or {})[1] or nil
+	local game_override_one = (advance_info.game_override or {})[2] == nil
+		and (advance_info.game_override or {})[1] or nil
+
 	local description_row = T.row {
 		T.column { T.label { use_markup = true, label = label } },
 	}
@@ -59,6 +64,9 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 		return_value = -3,
 		label = "\n" .. translate("Reset") .. "\n"
 	}
+	local reset_column = (unit_override_one or game_override_one)
+		and T.column { horizontal_grow = true, reset_button }
+		or false
 
 	local help_button = T.button {
 		return_value = -4,
@@ -66,10 +74,10 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 	}
 
 	local reset_help_buttons = T.grid {
-		T.row {
-			T.column { horizontal_grow = true, reset_button },
+		T.row(filter_false {
+			reset_column,
 			T.column { horizontal_grow = true, help_button }
-		}
+		})
 	}
 	local unit_button_label = pickadvance.no_recruit_map and "\nSave\n" or "\nSave for unit\n"
 	local unit_button = T.button { return_value = -1, label = unit_button_label }
@@ -93,10 +101,10 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 	local function preshow()
 		for i, advance_type in ipairs(options) do
 			local text = spacer .. advance_type.name
-			if advance_type.id == (advance_info.unit_override or {})[1] and advance_info.unit_override[2] == nil then
+			if advance_type.id == unit_override_one then
 				text = text .. " &lt;-unit"
 			end
-			if advance_type.id == (advance_info.game_override or {})[1] and advance_info.game_override[2] == nil then
+			if advance_type.id == game_override_one then
 				text = text .. " &lt;-recruits"
 			end
 			text = text .. "  " .. spacer
