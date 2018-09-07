@@ -119,6 +119,31 @@ local function initialize_unit(unit)
 	end
 end
 
+
+function pickadvance.pick_advance(unit)
+	unit = unit or wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
+	initialize_unit(unit)
+	local _, orig_options_sanitized = original_advances(unit)
+	local dialog_result = wesnoth.synchronize_choice(function()
+		local dialog_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit))
+		print_as_json("locally chosen advance for unit", unit.id, dialog_result)
+		return dialog_result
+	end)
+	print_as_json("applying manual choice for", unit.id, dialog_result)
+	dialog_result.unit_override = split_comma_units(dialog_result.unit_override)
+	dialog_result.game_override = split_comma_units(dialog_result.game_override)
+	dialog_result.unit_override = filter_overrides(unit, dialog_result.unit_override)
+	dialog_result.game_override = filter_overrides(unit, dialog_result.game_override)
+	if dialog_result.is_unit_override then
+		unit.advances_to = dialog_result.unit_override
+	end
+	if dialog_result.is_game_override then
+		local key = "pickadvance_side" .. unit.side .. "_" .. orig_options_sanitized
+		wesnoth.set_variable(key, table.concat(dialog_result.game_override, ","))
+	end
+end
+
+
 function pickadvance.initialize_unit_x1y1(x1, y1)
 	local unit = wesnoth.get_unit(x1 or wml.variables.x1, y1 or wml.variables.y1)
 	initialize_unit(unit)
@@ -157,30 +182,6 @@ function pickadvance.start_event()
 		name = "turn refresh",
 		T.lua { code = "pickadvance.turn_refresh_event()" }
 	}
-end
-
-
-function pickadvance.pick_advance(unit)
-	unit = unit or wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
-	initialize_unit(unit)
-	local _, orig_options_sanitized = original_advances(unit)
-	local dialog_result = wesnoth.synchronize_choice(function()
-		local dialog_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit))
-		print_as_json("locally chosen advance for unit", unit.id, dialog_result)
-		return dialog_result
-	end)
-	print_as_json("applying manual choice for", unit.id, dialog_result)
-	dialog_result.unit_override = split_comma_units(dialog_result.unit_override)
-	dialog_result.game_override = split_comma_units(dialog_result.game_override)
-	dialog_result.unit_override = filter_overrides(unit, dialog_result.unit_override)
-	dialog_result.game_override = filter_overrides(unit, dialog_result.game_override)
-	if dialog_result.is_unit_override then
-		unit.advances_to = dialog_result.unit_override
-	end
-	if dialog_result.is_game_override then
-		local key = "pickadvance_side" .. unit.side .. "_" .. orig_options_sanitized
-		wesnoth.set_variable(key, table.concat(dialog_result.game_override, ","))
-	end
 end
 
 
