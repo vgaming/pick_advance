@@ -23,13 +23,6 @@ end
 function pickadvance.show_dialog_unsynchronized(advance_info)
 	local spacer = "\n"
 	local label = "Plan advance:"
---	local label = "Pick advance. Current overrides: \n"
---	if advance_info.unit_override then
---		label = label .. table.concat(advance_info.unit_override, ",") .. " (unit), \n"
---	end
---	if advance_info.game_override then
---		label = label .. table.concat(advance_info.game_override, ",") .. " (game), \n"
---	end
 
 	local unit_type_options = advance_info.type_advances
 	--print_as_json("advances for", unit.type, unit_type_options)
@@ -91,7 +84,6 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 			T.row { T.column { T.spacer { width = 250 } } },
 			description_row,
 			T.row { T.column { horizontal_grow = true, listbox } },
-			--T.row { T.column { T.label { use_markup = true, label = "Save as default advance for:" } }, },
 			T.row { T.column { horizontal_grow = true, unit_button } },
 			recruits_button,
 			T.row { T.column { horizontal_grow = true, reset_help_buttons } },
