@@ -144,11 +144,13 @@ function pickadvance.pick_advance(unit)
 end
 
 
-function pickadvance.initialize_unit_x1y1(x1, y1)
-	local unit = wesnoth.get_unit(x1 or wml.variables.x1, y1 or wml.variables.y1)
+function pickadvance.initialize_unit_x1y1()
+	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
 	initialize_unit(unit)
+	if #unit.advances_to > 1 and pickadvance.force_choice and unit.side == wesnoth.current.side then
+		pickadvance.pick_advance(unit)
+	end
 end
-
 
 function pickadvance.turn_refresh_event()
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
@@ -169,7 +171,7 @@ function pickadvance.start_event()
 	pickadvance.force_choice = not pickadvance.have_recruits or wesnoth.get_variable("pickadvance_force_choice")
 	wesnoth.wml_actions.event {
 		first_time_only = false,
-		name = "recruit", -- it's important for sync that player controls the unit
+		name = "recruit",
 		T.lua { code = "pickadvance.initialize_unit_x1y1()" }
 	}
 	wesnoth.wml_actions.event {
