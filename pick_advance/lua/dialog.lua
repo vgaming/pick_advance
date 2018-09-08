@@ -79,10 +79,10 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 			T.column { horizontal_grow = true, help_button }
 		})
 	}
-	local unit_button_label = pickadvance.no_recruit_map and "\nSave\n" or "\nSave for unit\n"
+	local unit_button_label = pickadvance.have_recruits and "\nSave for unit\n" or "\nSave\n"
 	local unit_button = T.button { return_value = -1, label = unit_button_label }
 	local recruits_subbutton = T.button { return_value = 1, label = "\nSave for unit and new recruits\n" }
-	local recruits_button = not pickadvance.no_recruit_map
+	local recruits_button = pickadvance.have_recruits
 		and T.row { T.column { horizontal_grow = true, recruits_subbutton } }
 
 	local dialog = {

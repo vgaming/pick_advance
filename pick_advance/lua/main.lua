@@ -153,20 +153,20 @@ end
 function pickadvance.turn_refresh_event()
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
 		initialize_unit(unit)
-		if #unit.advances_to > 1 and pickadvance.force_choice then
+		if #unit.advances_to > 1 and pickadvance.force_choice and wesnoth.current.turn > 1 then
 			pickadvance.pick_advance(unit)
 		end
 	end
 end
 
 function pickadvance.start_event()
-	pickadvance.no_recruit_map = true
+	pickadvance.have_recruits = false
 	for _, side in ipairs(wesnoth.sides) do
 		if #side.recruit ~= 0 and side.__cfg.allow_player then
-			pickadvance.no_recruit_map = false
+			pickadvance.have_recruits = true
 		end
 	end
-	pickadvance.force_choice = pickadvance.no_recruit_map or wesnoth.get_variable("pickadvance_force_choice")
+	pickadvance.force_choice = not pickadvance.have_recruits or wesnoth.get_variable("pickadvance_force_choice")
 	wesnoth.wml_actions.event {
 		first_time_only = false,
 		name = "recruit", -- it's important for sync that player controls the unit
