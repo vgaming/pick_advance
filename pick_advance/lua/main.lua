@@ -147,7 +147,7 @@ end
 function pickadvance.initialize_unit_x1y1()
 	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
 	initialize_unit(unit)
-	if #unit.advances_to > 1 and pickadvance.force_choice and unit.side == wesnoth.current.side then
+	if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and unit.side == wesnoth.current.side then
 		pickadvance.pick_advance(unit)
 	end
 end
@@ -155,20 +155,21 @@ end
 function pickadvance.turn_refresh_event()
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
 		initialize_unit(unit)
-		if #unit.advances_to > 1 and pickadvance.force_choice and wesnoth.current.turn > 1 then
+		if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and wesnoth.current.turn > 1 then
 			pickadvance.pick_advance(unit)
 		end
 	end
 end
 
 function pickadvance.start_event()
-	pickadvance.have_recruits = false
+	wml.variables.pickadvance_have_recruits = false
 	for _, side in ipairs(wesnoth.sides) do
 		if #side.recruit ~= 0 and side.__cfg.allow_player then
-			pickadvance.have_recruits = true
+			wml.variables.pickadvance_have_recruits = true
 		end
 	end
-	pickadvance.force_choice = not pickadvance.have_recruits or wesnoth.get_variable("pickadvance_force_choice")
+	wml.variables.pickadvance_force_choice = wml.variables.pickadvance_force_choice
+		or not wml.variables.pickadvance_have_recruits
 	wesnoth.wml_actions.event {
 		first_time_only = false,
 		name = "recruit",

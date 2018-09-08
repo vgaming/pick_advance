@@ -7,5 +7,5 @@ With this add-on, you can set them beforehand for:
 
 To add-on developers:
 You can signal this add-on to force choosing upgrades for your map.
-To do that, set the variable ''pickadvance_force_choice'' to true before ''start'' event.
+To do that, set the variable ''pickadvance_force_choice'' to true.
 Alternatively, set empty recruit list for all human sides.
