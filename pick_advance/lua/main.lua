@@ -54,6 +54,17 @@ local function original_advances(unit)
 	return split_comma_units(variable), clean_type_func(variable)
 end
 
+local function set_advances(unit, array)
+	wesnoth.add_modification(unit, "object", {
+		id = "pickadvance",
+		T.effect {
+			apply_to = "new_advancement",
+			replace = true,
+			types = table.concat(array, ",")
+		}
+	})
+end
+
 
 local function array_to_set(arr)
 	local result = {}
@@ -114,7 +125,7 @@ local function initialize_unit(unit)
 		local advance_info = get_advance_info(unit)
 		local desired = advance_info.game_override or unit.advances_to
 		desired = filter_overrides(unit, desired)
-		unit.advances_to = desired
+		set_advances(unit, desired)
 		print_as_json("initialized unit", unit.id, unit.advances_to)
 	end
 end
@@ -135,7 +146,7 @@ function pickadvance.pick_advance(unit)
 	dialog_result.unit_override = filter_overrides(unit, dialog_result.unit_override)
 	dialog_result.game_override = filter_overrides(unit, dialog_result.game_override)
 	if dialog_result.is_unit_override then
-		unit.advances_to = dialog_result.unit_override
+		set_advances(unit, dialog_result.unit_override)
 	end
 	if dialog_result.is_game_override then
 		local key = "pickadvance_side" .. unit.side .. "_" .. orig_options_sanitized
