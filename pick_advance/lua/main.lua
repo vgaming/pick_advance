@@ -139,7 +139,10 @@ function pickadvance.pick_advance(unit)
 		local local_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit))
 		print_as_json("locally chosen advance for unit", unit.id, local_result)
 		return local_result
-	end, function() return {} end)
+	end, function() return { is_ai = true } end)
+	if dialog_result.is_ai then
+		return
+	end
 	print_as_json("applying manual choice for", unit.id, dialog_result)
 	dialog_result.unit_override = split_comma_units(dialog_result.unit_override)
 	dialog_result.game_override = split_comma_units(dialog_result.game_override)
@@ -157,6 +160,7 @@ end
 
 function pickadvance.initialize_unit_x1y1()
 	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
+	if not wesnoth.sides[unit.side].__cfg.allow_player then return end
 	initialize_unit(unit)
 	if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and unit.side == wesnoth.current.side then
 		pickadvance.pick_advance(unit)
@@ -164,6 +168,7 @@ function pickadvance.initialize_unit_x1y1()
 end
 
 function pickadvance.turn_refresh_event()
+	if not wesnoth.sides[wesnoth.current.side].__cfg.allow_player then return end
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
 		initialize_unit(unit)
 		if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and wesnoth.current.turn > 1 then
