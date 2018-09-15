@@ -1,36 +1,68 @@
--- << pickadvance_advertisement
+-- << pickadvance/advertisement
 
 local wesnoth = wesnoth
 local ipairs = ipairs
 local tostring = tostring
 
-local script_arguments = ...
-local remote_version = tostring(script_arguments.remote_version)
-local filename = "~add-ons/pick_advance/target/version.txt"
+local addon_name = tostring((...).name)
+local addon_dir = tostring((...).dir)
+local addon_about = tostring((...).about)
+local addon_icon = tostring((...).icon)
 
-local side = wesnoth.sides[wesnoth.current.side]
-if not side.is_local and side.controller == "human" then
-	wesnoth.wml_actions.remove_event { id = "pickadvance_ad" }
-	if not wesnoth.have_file(filename) then
-		for _, s in ipairs(wesnoth.sides) do
-			if s.is_local then
-				wesnoth.message("PlanUnitAdvance", "When it's your turn, click on units to select their advances for the future. If you'll like this add-on, feel free to download it.")
-				return
-			end
-		end
+local filename = "~add-ons/" .. addon_dir .. "/target/version.txt"
+local function human_ver()
+	if wesnoth.have_file(filename) then
+		return { v = wesnoth.read_file(filename) }
 	else
-		local local_version = wesnoth.read_file(filename)
-		if wesnoth.compare_versions(remote_version, ">", local_version) then
-			wesnoth.wml_actions.message {
-				caption = "PlanUnitAdvance",
-				message = "🠉🠉🠉 Please upgrade your PlanUnitAdvance add-on 🠉🠉🠉"
-					.. "\n\n"
-					.. local_version .. " -> " .. remote_version
-					.. "(You can do that after the game)",
-				image = "misc/blank-hex.png~BLIT(lobby/status-lobby-s.png~SCALE(36,36),0,36)~BLIT(units/elves-wood/avenger.png~CROP(20,12,47,47)~SCALE(36,36),36,0)~BLIT(units/elves-wood/marksman.png~CROP(16,12,47,47)~SCALE(36,36),36,36)",
-			}
-		end
+		return { v = "0.0.0" }
 	end
 end
+
+local function ai_ver()
+	return { v = "0.0.0" }
+end
+
+
+local human_sides = {}
+for _, side in ipairs(wesnoth.sides) do
+	if side.__cfg.allow_player then human_sides[#human_sides + 1] = side.side end
+end
+
+local sync_choices = wesnoth.synchronize_choices(human_ver, ai_ver, human_sides)
+
+local highest_version = "0.0.0"
+for _, side_version in pairs(sync_choices) do
+	if wesnoth.compare_versions(side_version.v, ">", highest_version) then
+		highest_version = side_version.v
+	end
+end
+
+local my_version = human_ver().v
+
+if my_version == highest_version then
+	return
+end
+
+local advertisement
+if my_version == "0.0.0" then
+	advertisement = "This game uses " .. addon_name .. " add-on. "
+		.. "\n"
+		.. "If you'll like it, feel free to install it from add-ons server."
+		.. "\n\n"
+		.. "======================\n\n"
+		.. addon_about
+else
+	advertisement = "🠉🠉🠉 Please upgrade your " .. addon_name .. " add-on 🠉🠉🠉"
+		.. "\n"
+		.. my_version .. " -> " .. highest_version
+		.. "  (you may do that after the game)\n\n"
+end
+
+wesnoth.wml_actions.message {
+	caption = addon_name,
+	message = advertisement,
+	image = addon_icon .. "~SCALE_INTO(144,144)",
+}
+
 
 -- >>
