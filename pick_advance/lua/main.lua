@@ -123,6 +123,10 @@ end
 local function initialize_unit(unit)
 	local clean_type = clean_type_func(unit.type)
 	if unit.variables["pickadvance_orig_" .. clean_type] == nil then
+		wesnoth.wml_actions.remove_object {
+			object_id = "pickadvance",
+			id = unit.id
+		}
 		unit.variables["pickadvance_orig_" .. clean_type] = table.concat(unit.advances_to, ",")
 		local advance_info = get_advance_info(unit)
 		local desired = advance_info.game_override or unit.advances_to
