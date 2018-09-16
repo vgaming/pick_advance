@@ -9,3 +9,5 @@ To add-on developers:
 You can signal this add-on to force choosing upgrades for your map.
 To do that, set the variable ''pickadvance_force_choice'' to true.
 Alternatively, set empty recruit list for all human sides.
+
+2018-09-16 BUG FIX!!! Double-advance bug is spotted, and fixed immediately. Please report sooner if you spot bugs like that!

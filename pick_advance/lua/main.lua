@@ -55,14 +55,15 @@ local function original_advances(unit)
 end
 
 local function set_advances(unit, array)
-	wesnoth.add_modification(unit, "object", {
-		id = "pickadvance",
-		T.effect {
-			apply_to = "new_advancement",
-			replace = true,
-			types = table.concat(array, ",")
-		}
-	})
+	unit.advances_to = array
+--	wesnoth.add_modification(unit, "object", {
+--		id = "pickadvance",
+--		T.effect {
+--			apply_to = "new_advancement",
+--			replace = true,
+--			types = table.concat(array, ",")
+--		}
+--	})
 end
 
 
