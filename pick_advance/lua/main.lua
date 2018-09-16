@@ -7,6 +7,7 @@ local string = string
 local table = table
 local wesnoth = wesnoth
 local wml = wml
+local on_event = wesnoth.require("lua/on_event.lua")
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 
 wesnoth.wml_actions.event {
@@ -159,8 +160,8 @@ function pickadvance.pick_advance(unit)
 end
 
 
-function pickadvance.initialize_unit_x1y1()
-	local unit = wesnoth.get_unit(wml.variables.x1, wml.variables.y1)
+local function initialize_unit_x1y1(ctx)
+	local unit = wesnoth.get_unit(ctx.x1, ctx.y1)
 	if not wesnoth.sides[unit.side].__cfg.allow_player then return end
 	initialize_unit(unit)
 	if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and unit.side == wesnoth.current.side then
@@ -168,7 +169,7 @@ function pickadvance.initialize_unit_x1y1()
 	end
 end
 
-function pickadvance.turn_refresh_event()
+local function turn_refresh_event()
 	if not wesnoth.sides[wesnoth.current.side].__cfg.allow_player then return end
 	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
 		initialize_unit(unit)
@@ -187,22 +188,11 @@ function pickadvance.start_event()
 	end
 	wml.variables.pickadvance_force_choice = wml.variables.pickadvance_force_choice
 		or not wml.variables.pickadvance_have_recruits
-	wesnoth.wml_actions.event {
-		first_time_only = false,
-		name = "recruit",
-		T.lua { code = "pickadvance.initialize_unit_x1y1()" }
-	}
-	wesnoth.wml_actions.event {
-		first_time_only = false,
-		name = "post advance",
-		T.lua { code = "pickadvance.initialize_unit_x1y1()" }
-	}
-	wesnoth.wml_actions.event {
-		first_time_only = false,
-		name = "turn refresh",
-		T.lua { code = "pickadvance.turn_refresh_event()" }
-	}
 end
+
+on_event("recruit", -91, initialize_unit_x1y1)
+on_event("post advance", -91, initialize_unit_x1y1)
+on_event("turn refresh", -91, turn_refresh_event)
 
 
 -- >>
