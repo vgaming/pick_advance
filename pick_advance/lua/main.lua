@@ -38,13 +38,11 @@ local function split_comma_units(string_to_split)
 	local result = {}
 	local n = 1
 	for s in string.gmatch(string_to_split or "", "[^,]+") do
-		--print_as_json("checking advance string", s)
 		if s ~= "" and s ~= "null" and wesnoth.unit_types[s] then
 			result[n] = s
 			n = n + 1
 		end
 	end
-	--print_as_json("split: acceptable upgrades:", result)
 	return result
 end
 
