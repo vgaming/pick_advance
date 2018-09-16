@@ -30,7 +30,7 @@ wesnoth.wml_actions.set_menu_item {
 }
 
 local function clean_type_func(unit_type)
-	return string.gsub(unit_type, "[^a-zA-Z0-9_]", "")
+	return string.gsub(unit_type, "[^a-zA-Z0-9]", "_")
 end
 
 local function split_comma_units(string_to_split)
@@ -55,15 +55,15 @@ local function original_advances(unit)
 end
 
 local function set_advances(unit, array)
-	unit.advances_to = array
---	wesnoth.add_modification(unit, "object", {
---		id = "pickadvance",
---		T.effect {
---			apply_to = "new_advancement",
---			replace = true,
---			types = table.concat(array, ",")
---		}
---	})
+	wesnoth.add_modification(unit, "object", {
+		id = "pickadvance",
+		take_only_once = false,
+		T.effect {
+			apply_to = "new_advancement",
+			replace = true,
+			types = table.concat(array, ",")
+		}
+	})
 end
 
 
@@ -121,7 +121,7 @@ end
 
 local function initialize_unit(unit)
 	local clean_type = clean_type_func(unit.type)
-	if unit.variables["pickadvance_orig_" .. clean_type] == nil and #unit.advances_to > 1 then
+	if unit.variables["pickadvance_orig_" .. clean_type] == nil then
 		unit.variables["pickadvance_orig_" .. clean_type] = table.concat(unit.advances_to, ",")
 		local advance_info = get_advance_info(unit)
 		local desired = advance_info.game_override or unit.advances_to
