@@ -3,6 +3,3 @@ With this add-on, you can set them beforehand for:
 
 * one exact unit
 * all new recruits
-
-
-2018-09-16 BUG FIX!!! Double-advance bug is spotted, and fixed immediately. Please report sooner if you spot bugs like that!
