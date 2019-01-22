@@ -10,11 +10,6 @@ local wml = wml
 local on_event = wesnoth.require("lua/on_event.lua")
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 
-wesnoth.wml_actions.event {
-	first_time_only = true,
-	name = "start",
-	T.lua { code = "pickadvance.start_event()" }
-}
 wesnoth.wml_actions.set_menu_item {
 	id = "pickadvance",
 	description = "Pick Advance",
@@ -181,7 +176,7 @@ local function turn_refresh_event()
 	end
 end
 
-function pickadvance.start_event()
+on_event("start", -91, function()
 	wml.variables.pickadvance_have_recruits = false
 	for _, side in ipairs(wesnoth.sides) do
 		if #side.recruit ~= 0 and side.__cfg.allow_player then
@@ -190,7 +185,7 @@ function pickadvance.start_event()
 	end
 	wml.variables.pickadvance_force_choice = wml.variables.pickadvance_force_choice
 		or not wml.variables.pickadvance_have_recruits
-end
+end)
 
 on_event("recruit", -91, initialize_unit_x1y1)
 on_event("post advance", -91, initialize_unit_x1y1)
