@@ -135,7 +135,7 @@ function pickadvance.pick_advance(unit)
 	initialize_unit(unit)
 	local _, orig_options_sanitized = original_advances(unit)
 	local dialog_result = wesnoth.synchronize_choice(function()
-		local local_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit))
+		local local_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit), unit)
 		print_as_json("locally chosen advance for unit", unit.id, local_result)
 		return local_result
 	end, function() return { is_ai = true } end)
@@ -177,14 +177,14 @@ local function turn_refresh_event()
 end
 
 on_event("start", -91, function()
-	wml.variables.pickadvance_have_recruits = false
+	local recruits = false
 	for _, side in ipairs(wesnoth.sides) do
 		if #side.recruit ~= 0 and side.__cfg.allow_player then
-			wml.variables.pickadvance_have_recruits = true
+			recruits = true
 		end
 	end
 	wml.variables.pickadvance_force_choice = wml.variables.pickadvance_force_choice
-		or not wml.variables.pickadvance_have_recruits
+		or not recruits
 end)
 
 on_event("recruit", -91, initialize_unit_x1y1)

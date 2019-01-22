@@ -3,7 +3,6 @@
 pickadvance = {}
 local pickadvance = pickadvance
 local wesnoth = wesnoth
-local wml = wml
 local ipairs = ipairs
 local string = string
 local table = table
@@ -21,7 +20,7 @@ local function filter_false(arr)
 end
 
 
-function pickadvance.show_dialog_unsynchronized(advance_info)
+function pickadvance.show_dialog_unsynchronized(advance_info, unit)
 	local spacer = "\n"
 	local label = "Plan advance:"
 
@@ -80,10 +79,10 @@ function pickadvance.show_dialog_unsynchronized(advance_info)
 			T.column { horizontal_grow = true, help_button }
 		})
 	}
-	local unit_button_label = wml.variables.pickadvance_have_recruits and "\nSave for unit\n" or "\nSave\n"
+	local unit_button_label = unit.canrecruit and "\nSave\n" or "\nSave for unit\n"
 	local unit_button = T.button { return_value = -1, label = unit_button_label }
-	local recruits_subbutton = T.button { return_value = 1, label = "\nSave for unit and new recruits\n" }
-	local recruits_button = wml.variables.pickadvance_have_recruits
+	local recruits_subbutton = T.button { return_value = 1, label = "\nSave for this unit and new\n" }
+	local recruits_button = not unit.canrecruit
 		and T.row { T.column { horizontal_grow = true, recruits_subbutton } }
 
 	local dialog = {
