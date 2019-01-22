@@ -3,6 +3,7 @@ not_pushed_ignore=true
 upload_to_wesnoth_versions=(1.14)
 
 icon() {
+	mkdir -p src/target
 	hex="misc/blank-hex.png"
 	question="misc/qmark.png~SCALE(36,36)"
 	arrow="lobby/status-lobby-s.png~SCALE(36,36)"
