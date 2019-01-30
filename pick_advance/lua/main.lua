@@ -166,16 +166,6 @@ local function initialize_unit_x1y1(ctx)
 	end
 end
 
-local function turn_refresh_event()
-	if not wesnoth.sides[wesnoth.current.side].__cfg.allow_player then return end
-	for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
-		initialize_unit(unit)
-		if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and wesnoth.current.turn > 1 then
-			pickadvance.pick_advance(unit)
-		end
-	end
-end
-
 on_event("start", -91, function()
 	local recruits = false
 	for _, side in ipairs(wesnoth.sides) do
@@ -187,9 +177,25 @@ on_event("start", -91, function()
 		or not recruits
 end)
 
+local fresh_turn = false
+on_event("turn refresh", -91, function()
+	fresh_turn = true
+end)
+on_event("moveto", -91, function()
+	if fresh_turn then
+		fresh_turn = false
+		if not wesnoth.sides[wesnoth.current.side].__cfg.allow_player then return end
+		for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
+			initialize_unit(unit)
+			if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and wesnoth.current.turn > 1 then
+				pickadvance.pick_advance(unit)
+			end
+		end
+	end
+end)
+
 on_event("recruit", -91, initialize_unit_x1y1)
 on_event("post advance", -91, initialize_unit_x1y1)
-on_event("turn refresh", -91, turn_refresh_event)
 
 
 -- >>
