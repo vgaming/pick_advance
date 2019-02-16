@@ -1,7 +1,6 @@
 -- << pick_advance/main.lua
 
 local pickadvance = pickadvance
-local print_as_json = print_as_json
 local ipairs = ipairs
 local string = string
 local table = table
@@ -125,7 +124,7 @@ local function initialize_unit(unit)
 		local desired = advance_info.game_override or unit.advances_to
 		desired = filter_overrides(unit, desired)
 		set_advances(unit, desired)
-		print_as_json("initialized unit", unit.id, unit.advances_to)
+		-- print_as_json("initialized unit", unit.id, unit.advances_to)
 	end
 end
 
@@ -136,13 +135,13 @@ function pickadvance.pick_advance(unit)
 	local _, orig_options_sanitized = original_advances(unit)
 	local dialog_result = wesnoth.synchronize_choice(function()
 		local local_result = pickadvance.show_dialog_unsynchronized(get_advance_info(unit), unit)
-		print_as_json("locally chosen advance for unit", unit.id, local_result)
+		-- print_as_json("locally chosen advance for unit", unit.id, local_result)
 		return local_result
 	end, function() return { is_ai = true } end)
 	if dialog_result.is_ai then
 		return
 	end
-	print_as_json("applying manual choice for", unit.id, dialog_result)
+	-- print_as_json("applying manual choice for", unit.id, dialog_result)
 	dialog_result.unit_override = split_comma_units(dialog_result.unit_override)
 	dialog_result.game_override = split_comma_units(dialog_result.game_override)
 	dialog_result.unit_override = filter_overrides(unit, dialog_result.unit_override)

@@ -4,7 +4,6 @@ pickadvance = {}
 local pickadvance = pickadvance
 local wesnoth = wesnoth
 local ipairs = ipairs
-local string = string
 local table = table
 local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 local translate = wesnoth.textdomain "wesnoth"
@@ -147,8 +146,8 @@ function pickadvance.show_dialog_unsynchronized(advance_info, unit)
 		}
 	end
 	local is_ok = dialog_exit_code > -2 and item_result >= 1
-	print(string.format("Button %s pressed (%s). Item %s selected: %s",
-		dialog_exit_code, is_ok and "ok" or "not ok", item_result, options[item_result].id))
+	--print(string.format("Button %s pressed (%s). Item %s selected: %s",
+	--	dialog_exit_code, is_ok and "ok" or "not ok", item_result, options[item_result].id))
 	local game_scope = dialog_exit_code == 1
 	return {
 		is_unit_override = is_reset or is_ok,
