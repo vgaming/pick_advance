@@ -188,6 +188,11 @@ on_event("moveto", -91, function()
 			initialize_unit(unit)
 			if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and wesnoth.current.turn > 1 then
 				pickadvance.pick_advance(unit)
+				if #unit.advances_to > 1 then
+					local len = #unit.advances_to
+					local rand = wesnoth.random(len)
+					unit.advances_to = { unit.advances_to[rand] }
+				end
 			end
 		end
 	end
