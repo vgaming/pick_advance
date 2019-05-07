@@ -185,7 +185,6 @@ on_event("moveto", -91, function()
 		fresh_turn = false
 		if not wesnoth.sides[wesnoth.current.side].__cfg.allow_player then return end
 		for _, unit in ipairs(wesnoth.get_units { side = wesnoth.current.side }) do
-			initialize_unit(unit)
 			if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and wesnoth.current.turn > 1 then
 				pickadvance.pick_advance(unit)
 				if #unit.advances_to > 1 then
@@ -193,6 +192,8 @@ on_event("moveto", -91, function()
 					local rand = wesnoth.random(len)
 					unit.advances_to = { unit.advances_to[rand] }
 				end
+			else
+				initialize_unit(unit)
 			end
 		end
 	end
