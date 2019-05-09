@@ -1,5 +1,5 @@
 In multiplayer game, you do not control unit advances if they happen on enemy turn.
-With this add-on, you can set them beforehand for:
+With this add-on, you can set them beforehand:
 
-* one exact unit
-* all new recruits
+* for one exact unit
+* for all new recruits
