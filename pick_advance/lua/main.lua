@@ -165,15 +165,29 @@ local function initialize_unit_x1y1(ctx)
 	end
 end
 
-on_event("start", -91, function()
-	local recruits = false
+local function humans_can_recruit()
 	for _, side in ipairs(wesnoth.sides) do
 		if #side.recruit ~= 0 and side.__cfg.allow_player then
-			recruits = true
+			return true
 		end
 	end
+end
+local function map_has_keeps()
+	local width,height,_ = wesnoth.get_map_size()
+	for x = 1, width do
+		for y = 1, height do
+			local terr = wesnoth.get_terrain(x, y)
+			local info = wesnoth.get_info(terr)
+			if info.keep then
+				return true
+			end
+		end
+	end
+end
+on_event("start", -91, function()
+	local map_has_recruits = humans_can_recruit() and map_has_keeps()
 	wml.variables.pickadvance_force_choice = wml.variables.pickadvance_force_choice
-		or not recruits
+		or not map_has_recruits
 end)
 
 local fresh_turn = false
