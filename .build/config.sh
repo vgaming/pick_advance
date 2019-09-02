@@ -1,6 +1,6 @@
 not_pushed_ignore=true
 
-upload_to_wesnoth_versions=(1.14)
+upload_to_wesnoth_versions=(1.14 1.15)
 
 icon() {
 	mkdir -p src/target
