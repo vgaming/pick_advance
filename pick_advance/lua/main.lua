@@ -156,10 +156,24 @@ function pickadvance.pick_advance(unit)
 end
 
 
+local known_units = {}
+local function make_unit_known(unit)  -- can be both unit or unit type
+	local type = unit.type or unit.id
+	if known_units[type] then return end
+	print_as_json("making unit known", unit)
+	known_units[type] = true
+	wesnoth.add_known_unit(type)
+	for _, advance in ipairs(unit.advances_to) do
+		print_as_json("going into advance", advance)
+		make_unit_known(wesnoth.unit_types[advance])
+	end
+end
+
 local function initialize_unit_x1y1(ctx)
 	local unit = wesnoth.get_unit(ctx.x1, ctx.y1)
 	if not wesnoth.sides[unit.side].__cfg.allow_player then return end
 	initialize_unit(unit)
+	make_unit_known(unit)
 	if #unit.advances_to > 1 and wml.variables.pickadvance_force_choice and unit.side == wesnoth.current.side then
 		pickadvance.pick_advance(unit)
 	end
