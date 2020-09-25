@@ -181,7 +181,8 @@ end
 
 local function humans_can_recruit()
 	for _, side in ipairs(wesnoth.sides) do
-		if #side.recruit ~= 0 and side.__cfg.allow_player then
+		local units = wesnoth.get_units { side = side.side, canrecruit = false }
+		if side.__cfg.allow_player and (#side.recruit ~= 0 or #units > 0) then
 			return true
 		end
 	end
