@@ -129,22 +129,27 @@ function pickadvance.show_dialog_unsynchronized(advance_info, unit)
 		item_result = wesnoth.get_dialog_value("the_list")
 	end
 
-	local dialog_exit_code = wesnoth.show_dialog(dialog, preshow, postshow)
-	local is_help = dialog_exit_code == -4
-	local is_reset = dialog_exit_code == -3
-	--local is_cancel = dialog_exit_code == -2
-	if is_help then
-		wesnoth.wml_actions.message {
-			speaker = "narrator",
-			message = "<b>Save for unit</b> will make your unit always advance to said type. "
-				.. "Even if it's leveled during enemy-s turn."
-				.. "\n\n"
-				.. "<b>Save for game</b> applies to all new recruits of same type in game."
-				.. "\n\n"
-				.. wesnoth.get_variable("pickadvance_contacts"),
-			image = "misc/qmark.png~SCALE(200,200)"
-		}
+	local dialog_exit_code
+	while true do
+		dialog_exit_code = wesnoth.show_dialog(dialog, preshow, postshow)
+		local is_help = dialog_exit_code == -4
+		if is_help then
+			wesnoth.wml_actions.message {
+				speaker = "narrator",
+				message = "<b>Save for unit</b> will make your unit always advance to said type. "
+					.. "Even if it's leveled during enemy-s turn."
+					.. "\n\n"
+					.. "<b>Save for game</b> applies to all new recruits of same type in game."
+					.. "\n\n"
+					.. wesnoth.get_variable("pickadvance_contacts"),
+				image = "misc/qmark.png~SCALE(200,200)"
+			}
+		else
+			break
+		end
 	end
+	--local is_cancel = dialog_exit_code == -2
+	local is_reset = dialog_exit_code == -3
 	local is_ok = dialog_exit_code > -2 and item_result >= 1
 	--print(string.format("Button %s pressed (%s). Item %s selected: %s",
 	--	dialog_exit_code, is_ok and "ok" or "not ok", item_result, options[item_result].id))
