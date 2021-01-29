@@ -160,11 +160,11 @@ local known_units = {}
 local function make_unit_known(unit)  -- can be both unit or unit type
 	local type = unit.type or unit.id
 	if known_units[type] then return end
-	print_as_json("making unit known", unit)
+	-- print_as_json("making unit known", unit)
 	known_units[type] = true
 	wesnoth.add_known_unit(type)
 	for _, advance in ipairs(unit.advances_to) do
-		print_as_json("going into advance", advance)
+		-- print_as_json("going into advance", advance)
 		make_unit_known(wesnoth.unit_types[advance])
 	end
 end
@@ -206,10 +206,10 @@ on_event("start", -91, function()
 end)
 
 local fresh_turn = false
-on_event("turn refresh", -91, function()
+on_event("turn refresh", function()
 	fresh_turn = true
 end)
-on_event("moveto", -91, function()
+on_event("moveto", function()
 	if fresh_turn then
 		fresh_turn = false
 		if not wesnoth.sides[wesnoth.current.side].__cfg.allow_player then return end
@@ -228,8 +228,8 @@ on_event("moveto", -91, function()
 	end
 end)
 
-on_event("recruit", -91, initialize_unit_x1y1)
-on_event("post advance", -91, initialize_unit_x1y1)
+on_event("recruit", initialize_unit_x1y1)
+on_event("post advance", initialize_unit_x1y1)
 
 
 -- >>
