@@ -5,17 +5,33 @@ local string = string
 local tostring = tostring
 local wml = wml
 local on_event = wesnoth.require("lua/on_event.lua")
+local T = wesnoth.require("lua/helper.lua").set_wml_tag_metatable {}
 
 local addon_name = tostring((...).name)
 local addon_dir = tostring((...).dir)
 local addon_about = tostring((...).about)
 local addon_icon = tostring((...).icon)
+local addon_host_version = tostring((...).version)
+addon_icon = string.gsub(addon_icon, "\n", "") .. "~SCALE_INTO(144,144)"
+
+wesnoth.wml_actions.set_menu_item {
+	id = "about_" .. addon_dir,
+	description = "About: " .. addon_name,
+	synced = false,
+	T.command {
+		T.message {
+			caption = addon_name .. " v" .. addon_host_version,
+			message = addon_about,
+			image = addon_icon
+		}
+	}
+}
 
 local function show_message(text)
 	wesnoth.wml_actions.message {
 		caption = addon_name,
 		message = text,
-		image = string.gsub(addon_icon, "\n", "") .. "~SCALE_INTO(144,144)",
+		image = addon_icon,
 	}
 end
 
@@ -37,7 +53,7 @@ end)
 if my_version == "0.0.0" then
 	local text = "This game uses " .. addon_name .. " add-on. "
 		.. "\n"
-		.. "If you'll like it, feel free to install it from add-ons server."
+		.. "If you like it, feel free to install it from add-ons server."
 		.. "\n\n"
 		.. "======================\n\n"
 		.. addon_about
